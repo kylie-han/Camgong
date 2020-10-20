@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">모여락</string>
+    <string name="text_default">loading fail</string>
+</resources>
