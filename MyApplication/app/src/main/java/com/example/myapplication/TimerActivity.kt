@@ -15,7 +15,6 @@ class TimerActivity : AppCompatActivity() {
         setContentView(R.layout.activity_timer)
 
         btnPause.setOnClickListener {
-            val intent = Intent(this, TimerActivity::class.java)
             AlertDialog.Builder(this)
                 .setMessage("기록되었습니다.")
                 .setPositiveButton("OK",
