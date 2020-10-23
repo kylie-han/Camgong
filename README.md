@@ -25,3 +25,7 @@
 ## 👀와이어프레임
 
 ![wireframe](/uploads/7053b527109bfc956b161d5e3d6b12c2/wireframe.png)
+
+## 📝개발 계획
+
+![개발계획](/uploads/05e2cbe69f151c2bd181e5844b85a4e5/개발계획.png)
