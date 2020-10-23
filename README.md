@@ -24,4 +24,4 @@
 
 ## 👀와이어프레임
 
-![](C:\Project\final_project\s03p31a410\res\wireframe.png)
+![wireframe](/uploads/7053b527109bfc956b161d5e3d6b12c2/wireframe.png)
