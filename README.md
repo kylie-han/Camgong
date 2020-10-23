@@ -1,7 +1,3 @@
-# 프로젝트 계획
-
-# 프로젝트 주제
-
 ## 🤳스터디 어플
 
 공부하는 시간을 기록하고 공부하는 나를 스스로 감시하는 어플
@@ -28,4 +24,4 @@
 
 ## 👀와이어프레임
 
-![Untitled](C:\Users\multicampus\Downloads\Export-09a9bcca-7031-484c-88de-346ce413863d\프로젝트 계획 b85683f575194c66a28ad274f06a2cce\Untitled.png)
+![](C:\Project\final_project\s03p31a410\res\wireframe.png)
