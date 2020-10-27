@@ -28,4 +28,4 @@
 
 ## 📝개발 계획
 
-![개발계획](/uploads/05e2cbe69f151c2bd181e5844b85a4e5/개발계획.png)
+![gantt_chart](/uploads/1f8a04f392258ca5cc379aba690d4683/gantt_chart.png)
