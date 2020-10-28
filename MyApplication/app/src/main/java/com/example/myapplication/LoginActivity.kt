@@ -3,6 +3,7 @@ package com.example.myapplication
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.content.Intent
+import android.util.Log
 import android.widget.Toast
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -24,7 +25,6 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-
         //구글 로그인 부분
         // [START config_signin]
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -37,6 +37,7 @@ class LoginActivity : AppCompatActivity() {
         googleLoginBtn.setOnClickListener {
             val signInIntent = googleSigninClient?.getSignInIntent()
             startActivityForResult(signInIntent, RC_SIGN_IN)
+
         }
     }
 
@@ -44,6 +45,7 @@ class LoginActivity : AppCompatActivity() {
     // [START onActivityResult]//구글 로그인 부분
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
         // Google 로그인 인텐트 응답
         if (requestCode === RC_SIGN_IN) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
@@ -54,7 +56,6 @@ class LoginActivity : AppCompatActivity() {
                     firebaseAuthWithGoogle(account)
                 }
             } catch (e: ApiException) {
-
             }
         }
     }
