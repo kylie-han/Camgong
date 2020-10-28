@@ -1,15 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent">
 
-    <CalendarView
-        android:id="@+id/calendarView"
+    <com.applikeysolutions.cosmocalendar.view.CalendarView
+        android:id="@+id/calendar"
+        android:layout_width="match_parent"
+        android:layout_height="455dp"
+        app:connectedDayIconPosition="top"
+        app:currentDayTextColor="#f79256"
+        app:firstDayOfTheWeek="sunday"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:orientation="horizontal"
+        app:selectedDayBackgroundColor="#FFEACA"
+        app:selectedDayBackgroundEndColor="#f79256"
+        app:selectedDayBackgroundStartColor="#f79256"
+        app:selectedDayTextColor="#FFFFFF"
+        app:selectionType="single"
+        app:weekendDayTextColor="#ef4550">
+        <!--        selectionType: range로 바꾸면 범위 설정 가능-->
+
+    </com.applikeysolutions.cosmocalendar.view.CalendarView>
+
+    <TextView
+        android:id="@+id/tv_msg1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:layout_editor_absoluteX="30dp"
-        tools:layout_editor_absoluteY="83dp"
-        tools:ignore="MissingConstraints" />
+        android:layout_marginStart="80dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="32dp"
+        android:text="총 공부시간"
+        app:layout_constraintBottom_toTopOf="@+id/tv_totalTime"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/calendar" />
+
+    <TextView
+        android:id="@+id/tv_msg2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="80dp"
+        android:text="실제 공부시간"
+        app:layout_constraintBottom_toTopOf="@+id/tv_studyTime"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/calendar" />
+
+    <TextView
+        android:id="@+id/tv_msg3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="64dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="100dp"
+        android:text="최대 집중시간"
+        app:layout_constraintBottom_toTopOf="@+id/tv_maxFocusTime"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_totalTime" />
+
+    <TextView
+        android:id="@+id/tv_breakRatio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="220dp"
+        android:text="휴식비율"
+        app:layout_constraintBottom_toTopOf="@+id/tv_studtyRatio"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/calendar" />
+
+    <TextView
+        android:id="@+id/tv_studtyRatio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-10dp"
+        android:text="공부 비율"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_breakRatio" />
+
+    <TextView
+        android:id="@+id/tv_msg4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="80dp"
+        android:layout_marginEnd="96dp"
+        android:text="휴식시간"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_studyTime" />
+
+    <TextView
+        android:id="@+id/tv_totalTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="80dp"
+        android:layout_marginBottom="30dp"
+        android:text="공부해"
+        app:layout_constraintBottom_toTopOf="@+id/tv_msg3"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_msg1" />
+
+    <TextView
+        android:id="@+id/tv_studyTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="96dp"
+        android:layout_marginBottom="1dp"
+        android:text="공부하라구"
+        app:layout_constraintBottom_toTopOf="@+id/tv_msg4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_msg2" />
+
+    <TextView
+        android:id="@+id/tv_breakTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="80dp"
+        android:layout_marginTop="16dp"
+        android:text="지금 쉬는거야?"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/tv_maxFocusTime"
+        app:layout_constraintTop_toBottomOf="@+id/tv_msg4" />
+
+    <TextView
+        android:id="@+id/tv_maxFocusTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="집중해"
+        app:layout_constraintEnd_toStartOf="@+id/tv_breakTime"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_msg3" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
