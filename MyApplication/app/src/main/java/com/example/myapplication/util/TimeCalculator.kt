@@ -2,18 +2,17 @@ package com.example.myapplication.util
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.example.myapplication.models.Focusstudytime
+import com.example.myapplication.models.FocusStudyTime
 import java.time.*
 import java.time.format.DateTimeFormatter
 import kotlin.math.abs
-import kotlin.time.milliseconds
 
 @RequiresApi(Build.VERSION_CODES.O)
 class TimeCalculator {
     // 시간 계산
     private val current = LocalDateTime.now(ZoneId.of("Asia/Seoul"))
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
-    private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
+    private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
 
     /**
      * today() : 오늘 날짜
@@ -24,7 +23,7 @@ class TimeCalculator {
      * timeToString : LocalTime의 시간을 String으로 변환
      * stringToDate : String형의 날짜를 LocalDate형으로 변환
      * stringToTime :
-     * msToStringTime : Long형의 millisecond를 String형 시간(시:분:초)으로 변환
+     * msToStringTime : Long형의 millisecond를 String형 시간(시:분:초.ms)으로 변환
      */
     fun today(): String? {
         return current.format(dateFormatter)
@@ -37,13 +36,14 @@ class TimeCalculator {
         val end = LocalTime.parse(endTime, timeFormatter)
         val absSeconds = abs(Duration.between(start,end).seconds)
         return String.format(
-            "%02d:%02d:%02d",
-            absSeconds / 3600,
-            absSeconds % 3600 / 60,
-            absSeconds % 60
+            "%02d:%02d:%02d.%03d",
+            absSeconds / (60*60*1000),
+            absSeconds % (60*60*1000) / 60,
+            absSeconds % (60*60*1000) / (60*60),
+            absSeconds % 1000
         )
     }
-    fun addTime(times: Map<String,Focusstudytime>){
+    fun addTime(times: Map<String, FocusStudyTime>){
 
 
     }
@@ -60,19 +60,22 @@ class TimeCalculator {
         return LocalTime.parse(time, timeFormatter)
     }
     fun msToStringTime(milliSec: Long): String{
+        val ms = abs(milliSec)
         return String.format(
             "%02d:%02d:%02d.%03d",
-            milliSec / (60*60),
-            milliSec % (60*60) / 60,
-            milliSec % 60
+            ms / (60*60*1000),
+            ms % (60*60*1000) / (60*1000),
+            ms % (60*1000) / 1000,
+            ms % 1000
         )
-//        return String.format(
-//            "%02d:%02d:%02d.%03d",
-//            milliSec / (60*60*1000),
-//            milliSec % (60*60*1000) / 60,
-//            milliSec % (60*60*1000) / (60*60),
-//            milliSec % 1000
-//        )
+    }
+    fun stringToLong(time: String):Long{
+        val localtime = LocalTime.parse(time,timeFormatter)
+        val hours = localtime.hour.toLong()*60*60*1000
+        val min = localtime.minute*60*1000
+        val sec = localtime.second*1000
+        val milli = localtime.nano/1000000
+        return hours+min+sec+milli
     }
 }
 
