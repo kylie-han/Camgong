@@ -8,7 +8,6 @@ import android.view.KeyEvent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.SystemClock
 import android.util.Log
-import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_timer.*
@@ -42,7 +41,7 @@ class TimerActivity : AppCompatActivity() {
             time = chronometer.base-SystemClock.elapsedRealtime()
             val ref =FirebaseDatabase.getInstance().getReference("/calendar/$uid/$date/result")
             Log.d("time",""+ref)
-            ref.setValue(Cal(time))
+            ref.child("totalStudyTime").setValue(time)
             Log.d("time",""+time)
             AlertDialog.Builder(this)
                 .setMessage("기록되었습니다.")
@@ -65,9 +64,3 @@ class TimerActivity : AppCompatActivity() {
         return true
     }
 }
-
-data class Cal(
-    var totalstudytime: Long = 0,
-    var realstudytime: Long = 0,
-    var maxfocusstudytime: Long = 0
-)
