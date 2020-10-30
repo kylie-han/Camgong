@@ -1,11 +1,12 @@
 package com.example.myapplication.tabviewpager
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.applikeysolutions.cosmocalendar.listeners.OnMonthChangeListener
+import com.applikeysolutions.cosmocalendar.model.Month
 import com.applikeysolutions.cosmocalendar.selection.OnDaySelectedListener
 import com.applikeysolutions.cosmocalendar.selection.SingleSelectionManager
 import com.applikeysolutions.cosmocalendar.view.CalendarView
@@ -29,28 +30,49 @@ class FragmentTabCalendar : Fragment() {
         view.calendar.isShowDaysOfWeekTitle = false
         var calendarView: CalendarView = view.calendar as CalendarView
 
+        // 목표치 달성했는지 판단하여 달력에 표시하는메서드
+        isAchived()
+
+        // 캘린더 월 변경 리스너 -> isAchived() 호출
+        view.calendar.setOnMonthChangeListener(object : OnMonthChangeListener {
+            override fun onMonthChanged(month: Month?) { // 달이 변경되었을때
+                isAchived()
+            }
+        })
+        
+        // 선택된 날짜가 변경 되었을때
         view.calendar.selectionManager = SingleSelectionManager(OnDaySelectedListener {
             if (view.calendar.selectedDates.size <= 0)
                 return@OnDaySelectedListener
-
-            var selected: List<Calendar> = calendarView.selectedDates
-            var date:String = "더미~"
-
-            // YYYYMMDD
-            if (selected != null) {
-                for (cal in selected){ // 1개만 선택할 경우 selected[0]를 cal로 놔둘것
-                    val year = cal.get(Calendar.YEAR)
-                    val month = cal.get(Calendar.MONTH)+1
-                    val day = cal.get(Calendar.DAY_OF_MONTH)
-                    date = "${year}${month}${day}"
-                }
-            }
+            // 선택된 일자
+            var date = selectedDay(calendarView)
 
             // 파이어베이스에서 값 불러와서 textView에 표시
             getDate(view, date)
         })// end of Listener
-
         return view
+    }
+
+    private fun selectedDay(calendarView: CalendarView): String {
+        var selected: List<Calendar> = calendarView.selectedDates
+        var date:String = "더미~"
+
+        // 선택된 날짜를 가져옴(선택된것이 있을때만) + 그 주의 공부시간 총합 출력
+        if (selected != null) {
+            for (cal in selected){ // 1개만 선택할 경우 selected[0]를 cal로 놔둘것
+                val year = cal.get(Calendar.YEAR)
+                val month = cal.get(Calendar.MONTH)+1
+                val day = cal.get(Calendar.DAY_OF_MONTH)
+                date = "${year}${month}${day}"
+            }
+        }
+        return date
+    }
+
+    // 각 일자의 목표 달성여부를 판단하여 달력에 표시
+    private fun isAchived() {
+        val uid = FirebaseAuth.getInstance().uid
+        val ref = FirebaseDatabase.getInstance().getReference("/calendar/$uid")
     }
 
     fun getDate(view: View, date: String) {
