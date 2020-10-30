@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import com.applikeysolutions.cosmocalendar.listeners.OnMonthChangeListener
 import com.applikeysolutions.cosmocalendar.model.Month
 import com.applikeysolutions.cosmocalendar.selection.OnDaySelectedListener
@@ -36,10 +37,11 @@ class FragmentTabCalendar : Fragment() {
         // 캘린더 월 변경 리스너 -> isAchived() 호출
         view.calendar.setOnMonthChangeListener(object : OnMonthChangeListener {
             override fun onMonthChanged(month: Month?) { // 달이 변경되었을때
-                isAchived()
+//                isAchived()
+                Toast.makeText(view.context,"달 변경 됨", Toast.LENGTH_SHORT).show()
             }
         })
-        
+
         // 선택된 날짜가 변경 되었을때
         view.calendar.selectionManager = SingleSelectionManager(OnDaySelectedListener {
             if (view.calendar.selectedDates.size <= 0)
