@@ -6,4 +6,7 @@
     <color name="textColor">#8041D9</color>
     <color name="textBlack">#4C4848</color>
     <color name="btnBackColor">#7D5BAE</color>
+    <color name="cancelBtnBackColor">#E2E2E2</color>
+    <color name="calendar">#D1B2FF</color>
+    <color name="white">#FFFFFF</color>
 </resources>
