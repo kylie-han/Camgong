@@ -45,15 +45,17 @@ class FragmentTabStats : Fragment() {
             val myRef = database.getReference("calendar/$uid/$today")
 
             goalWrite(myRef)
-//            resultWrite(myRef)
+            resultWrite(myRef)
 
             // [START read_message]
             // Read from the database
-            myRef.child("/dailyGoal/goalTime").addValueEventListener(object : ValueEventListener {
+            myRef.child("/result").addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val value = dataSnapshot.getValue<String>()
-                    Log.d(TAG, "Value is: $value")
-                    view.textView.text = "목표시간은 $value 입니다"
+                    val value = dataSnapshot.getValue<Result>()
+                    val total = TimeCalculator().msToStringTime(value?.totalStudyTime!!)
+                    view.textView.text = "총 공부시간 : $total"
+
+                    Log.d(TAG,"real = ${value?.realStudyTime}")
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -79,7 +81,8 @@ class FragmentTabStats : Fragment() {
     }
     private fun resultWrite(myRef: DatabaseReference){
         val destination = myRef.child("/result")
-        val focusStudyTime: Map<String, FocusStudyTime> = emptyMap()
+        val focusTime = FocusStudyTime("13:00:00","14:00:00")
+        val focusStudyTime: List<FocusStudyTime> = listOf(focusTime)
         val maxFocusStudyTime = "00:30:00"
         val realStudyTime = "01:30:00"
         val totalStudyTime = 0L

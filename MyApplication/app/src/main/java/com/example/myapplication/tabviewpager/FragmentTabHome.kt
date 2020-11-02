@@ -50,7 +50,6 @@ class FragmentTabHome  : Fragment() {
                         val result = snapshot.getValue(Result::class.java)
                         if(result!=null)
                         {
-
                             Log.d("파베1",""+result.totalStudyTime)
                             time = result.totalStudyTime
                             view.chronometer.base= SystemClock.elapsedRealtime()+time
