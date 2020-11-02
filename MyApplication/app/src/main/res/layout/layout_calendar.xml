@@ -103,4 +103,12 @@
         android:layout_below="@+id/msg5"
         android:text="휴식 비율"
         android:textSize="30sp" />
+
+    <TextView
+        android:id="@+id/tv_calendar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/calendar"
+        android:text="테스트"
+        android:textSize="24sp" />
 </RelativeLayout>

@@ -2,6 +2,7 @@
 package com.example.myapplication.tabviewpager
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,6 +24,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import kotlinx.android.synthetic.main.layout_calendar.*
 import kotlinx.android.synthetic.main.layout_calendar.view.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -37,21 +39,26 @@ class FragmentTabCalendar : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.layout_calendar, container, false)
-
         view.calendar.isShowDaysOfWeekTitle = false
         var calendarView: CalendarView = view.calendar as CalendarView
 
+        var month = SimpleDateFormat("YYYYMM").format(Calendar.getInstance().time)
+
         // 목표치 달성했는지 판단하여 달력에 표시하는메서드
-        isAchived()
+        isAchived(view, month)
 
         // 캘린더 월 변경 리스너 -> isAchived() 호출
         view.calendar.setOnMonthChangeListener(object : OnMonthChangeListener {
             override fun onMonthChanged(month: Month?) { // 달이 변경되었을때
-//                isAchived()
-                Toast.makeText(view.context,"달 변경 됨", Toast.LENGTH_SHORT).show()
+                var date = month!!.monthName
+                var res:String = ""
+                if(date.length==8) res = date.slice(4..7) + date.slice(0..1) // 10월 이상
+                else res = date.slice(3..6) + "0" + date.slice(0..1) // 9월 이하
+                Log.e("달이 변경되었음", res)
+                isAchived(view, res)
+//                Toast.makeText(view.context,"달 변경 됨 -> \n${res}", Toast.LENGTH_SHORT).show()
             }
         })
-
 
         // 선택된 날짜가 변경 되었을때
         view.calendar.selectionManager = SingleSelectionManager(OnDaySelectedListener {
@@ -114,11 +121,53 @@ class FragmentTabCalendar : Fragment() {
         return date
     }
 
-    // 각 일자의 목표 달성여부를 판단하여 달력에 표시
-    private fun isAchived() {
+    // 각 일자의 목표 달성여부를 판단하여 달력에 표시 -> 미완성
+    // 실행되면 1~31일 훑어서 goalstatus 값에 따라 잘 가져오는것 까지 확인하였음 -> 값에따라 캘린더의 해당날짜에 표시
+    private fun isAchived(view: View, month: String) {
         val uid = FirebaseAuth.getInstance().uid
-        val ref = FirebaseDatabase.getInstance().getReference("/calendar/$uid")
-    }
+        val ins = FirebaseDatabase.getInstance()
+        var str = "출력값\n"
+        for (i in 1..31){
+            var date = ""
+            if(i<10) date = month + "0$i"
+            else date = month + "$i"
+            Log.e("date 값", date)
+            var ref = ins.getReference("/calendar/$uid/$date/dailygoal")
+
+            ref.addListenerForSingleValueEvent(object : ValueEventListener{
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    Log.e("메서드 date 값", date)
+                    if(snapshot.key.equals("dailygoal")){
+                        val goal = snapshot.getValue(DailyGoal::class.java)
+
+                        if(goal != null){ // 목표가 설정되어있을경우
+                            Log.e("달성 여부", goal.goalstatus.toString()) // 있는경우 잘 실행됨
+                            if(goal.goalstatus){ // 달성한 경우
+                                // 파란색으로 해당날짜에 표시
+                                Toast.makeText(view.context, "목표 달성\n$date", Toast.LENGTH_SHORT).show()
+                                str += date+"목표 달성\n"
+                            }else{ // 달성 못한 경우
+                                // 빨간색으로 해당날짜에 표시
+                                Toast.makeText(view.context, "목표 달성 실패\n$date", Toast.LENGTH_SHORT).show()
+                                str += date +"목표 실패\n"
+                            }
+                        }else{ // 목표가 없는 경우, 회색으로 해당날짜에 표시
+                            Toast.makeText(view.context, "목표 없음\n$date", Toast.LENGTH_SHORT).show()
+                            str += date + "목표 없음\n"
+                        }
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(view.context, "불러오기 실패\n$date", Toast.LENGTH_SHORT).show()
+                }
+
+            })
+        }// end of for
+        Log.e("str 출력", str)
+        Toast.makeText(view.context, str, Toast.LENGTH_LONG).show()
+        view.tv_calendar.text = str
+    } // end of isAchived()
 
     fun getDate(view: View, date: String) {
         val uid = FirebaseAuth.getInstance().uid
@@ -179,4 +228,9 @@ data class ResultTime(
     var totalstudytime: String = "",
     var realstudytime: String = "",
     var maxfocusstudytime: String = ""
+)
+
+data class DailyGoal(
+    var goalstatus: Boolean = false,
+    var goaltime: String = ""
 )
