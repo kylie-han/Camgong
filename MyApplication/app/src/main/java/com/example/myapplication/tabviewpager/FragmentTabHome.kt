@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.example.myapplication.CustomDialog
 import com.example.myapplication.R
 import com.example.myapplication.TimerActivity
 import com.example.myapplication.models.Result
@@ -62,12 +63,15 @@ class FragmentTabHome  : Fragment() {
             val intent = Intent(context, TimerActivity::class.java)
 
             intent.putExtra("time",time)
-            AlertDialog.Builder(context)
-                .setMessage("캠 스터디를 시작하시겠습니까?")
-                .setPositiveButton("OK",
-                    DialogInterface.OnClickListener { dialog, which -> startActivity(intent) })
-                .setNegativeButton("CANCEL", null)
-                .show()
+            context?.let { it1 ->
+                CustomDialog(it1)
+                    .setMessage("캠 스터디를 시작하시겠습니까?")
+                    .setPositiveButton("OK") {
+                        startActivity(intent)
+                    }.setNegativeButton("CANCEL") {
+                        null
+                    }.show()
+            }
 
 
         }

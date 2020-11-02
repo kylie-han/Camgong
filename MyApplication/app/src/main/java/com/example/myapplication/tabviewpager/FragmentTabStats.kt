@@ -1,7 +1,8 @@
 package com.example.myapplication.tabviewpager
 
+import android.app.DatePickerDialog
+import android.app.DatePickerDialog.OnDateSetListener
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,7 +20,11 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
+import kotlinx.android.synthetic.main.layout_stats.*
 import kotlinx.android.synthetic.main.layout_stats.view.*
+import java.text.SimpleDateFormat
+import java.util.*
+
 
 // DATE class를 사용하기 위한 API제한
 class FragmentTabStats : Fragment() {
@@ -29,6 +34,19 @@ class FragmentTabStats : Fragment() {
     companion object {
         private const val TAG = "FragmentTabStats"
     }
+    var calendar: Calendar = Calendar.getInstance()
+    val year = calendar.get(Calendar.YEAR)
+    val month = calendar.get(Calendar.MONTH) +1
+    val date = calendar.get(Calendar.DATE)
+
+    var myDatePicker =
+        OnDateSetListener { view, year, month, dayOfMonth ->
+            calendar.set(Calendar.YEAR, year)
+            calendar.set(Calendar.MONTH, month)
+            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+            updateLabel()
+        }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -63,6 +81,20 @@ class FragmentTabStats : Fragment() {
                     Log.w(TAG, "Failed to read value.", error.toException())
                 }
             })
+            view.calendarText.text = "$year.$month.$date"
+    
+            val tv_date = view.calendarText
+            tv_date.setOnClickListener {
+                context?.let { it1 ->
+                    DatePickerDialog(
+                        it1, R.style.DatePickerTheme,
+                        myDatePicker,
+                        calendar[Calendar.YEAR],
+                        calendar[Calendar.MONTH],
+                        calendar[Calendar.DAY_OF_MONTH]
+                    ).show()
+                }
+            }
         }
         // [END read_message]
         return view
@@ -90,4 +122,9 @@ class FragmentTabStats : Fragment() {
         destination.setValue(result)
     }
 
+    private fun updateLabel() {
+        val myFormat = "yyyy.MM.dd"
+        val sdf = SimpleDateFormat(myFormat, Locale.KOREA)
+        calendarText.text = sdf.format(calendar.time)
+    }
 }

@@ -43,23 +43,21 @@ class TimerActivity : AppCompatActivity() {
             Log.d("time",""+ref)
             ref.child("totalStudyTime").setValue(time)
             Log.d("time",""+time)
-            AlertDialog.Builder(this)
-                .setMessage("기록되었습니다.")
-                .setPositiveButton("OK",
-                    DialogInterface.OnClickListener { dialog, which -> finish() })
-                .show()
+            CustomDialog(this)
+                .setMessage("기록되었습니다")
+                .setPositiveButton("나가기") { finish()
+                }.setNegativeButton("계속하기") {null
+                }.show()
         }
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         when (keyCode) {
-            KeyEvent.KEYCODE_BACK -> {AlertDialog.Builder(this)
-                .setMessage("기록되었습니다.")
-                .setPositiveButton("OK",
-                    DialogInterface.OnClickListener { dialog, which -> finish() })
-                .show()
-
-            }
+            KeyEvent.KEYCODE_BACK -> CustomDialog(this)
+                .setMessage("기록되었습니다")
+                .setPositiveButton("나가기") { finish()
+                }.setNegativeButton("계속하기") {null
+                }.show()
         }
         return true
     }

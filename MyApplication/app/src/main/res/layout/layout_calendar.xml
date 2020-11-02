@@ -1,15 +1,144 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:layout_alignParentBottom="false"
+    android:layout_centerHorizontal="false"
+    android:orientation="vertical"
+    android:weightSum="1">
 
-    <CalendarView
-        android:id="@+id/calendarView"
+    <com.applikeysolutions.cosmocalendar.view.CalendarView
+        android:id="@+id/calendar"
+        android:layout_width="match_parent"
+        android:layout_height="455dp"
+        app:connectedDayIconPosition="top"
+        app:currentDayTextColor="#f79256"
+        app:firstDayOfTheWeek="sunday"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:orientation="horizontal"
+        app:selectedDayBackgroundColor="#FFEACA"
+        app:selectedDayBackgroundEndColor="#f79256"
+        app:selectedDayBackgroundStartColor="#f79256"
+        app:selectedDayTextColor="#FFFFFF"
+        app:selectionType="single"
+        app:weekendDayTextColor="#ef4550">
+        <!--        selectionType: range로 바꾸면 범위 설정 가능-->
+
+    </com.applikeysolutions.cosmocalendar.view.CalendarView>
+
+    <TextView
+        android:id="@+id/tv_msg1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:layout_editor_absoluteX="30dp"
-        tools:layout_editor_absoluteY="83dp"
-        tools:ignore="MissingConstraints" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_marginStart="80dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="32dp"
+        android:text="총 공부시간"
+        app:layout_constraintBottom_toTopOf="@+id/tv_totalTime"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/calendar" />
+
+    <TextView
+        android:id="@+id/tv_msg2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="80dp"
+        android:text="실제 공부시간"
+        app:layout_constraintBottom_toTopOf="@+id/tv_studyTime"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/calendar" />
+
+    <TextView
+        android:id="@+id/tv_msg3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="64dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="100dp"
+        android:text="최대 집중시간"
+        app:layout_constraintBottom_toTopOf="@+id/tv_maxFocusTime"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_totalTime" />
+
+    <TextView
+        android:id="@+id/tv_breakRatio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="220dp"
+        android:text="휴식비율"
+        app:layout_constraintBottom_toTopOf="@+id/tv_studtyRatio"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/calendar" />
+
+    <TextView
+        android:id="@+id/tv_studtyRatio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-10dp"
+        android:text="공부 비율"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_breakRatio" />
+
+    <TextView
+        android:id="@+id/tv_msg4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="80dp"
+        android:layout_marginEnd="96dp"
+        android:text="휴식시간"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_studyTime" />
+
+    <TextView
+        android:id="@+id/tv_totalTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="80dp"
+        android:layout_marginBottom="30dp"
+        android:text="공부해"
+        app:layout_constraintBottom_toTopOf="@+id/tv_msg3"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_msg1" />
+
+    <TextView
+        android:id="@+id/tv_studyTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true" />
+
+    <com.github.mikephil.charting.charts.PieChart
+        android:id="@+id/piechart"
+        android:layout_width="273dp"
+        android:layout_height="255dp"
+        android:layout_below="@id/view_pager_in"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/view_pager_in"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_below="@id/tab_in"
+        android:layout_weight="1"
+        />
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_in"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:tabGravity="fill"
+        android:layout_below="@id/calendarView"
+        app:tabIndicatorColor="#C7A2CD"
+        app:tabIndicatorGravity="top"
+        app:tabMaxWidth="0dp"
+        app:tabMode="fixed" />
+</RelativeLayout>
