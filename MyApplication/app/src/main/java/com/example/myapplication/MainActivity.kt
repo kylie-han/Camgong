@@ -32,13 +32,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         when (keyCode) {
-            KeyEvent.KEYCODE_BACK -> AlertDialog.Builder(this)
+            KeyEvent.KEYCODE_BACK -> CustomDialog(this)
                 .setTitle("종료하시겠습니까")
-                .setMessage("지켜보고있다.")
-                .setPositiveButton("OK",
-                    DialogInterface.OnClickListener { dialog, which -> finish() })
-                .setNegativeButton("CANCEL", null)
-                .show()
+                .setMessage("지켜보고있다")
+                .setPositiveButton("OK") { finish()
+                }.setNegativeButton("CANCEL") {null
+                }.show()
         }
         return true
     }

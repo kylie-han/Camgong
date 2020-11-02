@@ -1,46 +1,54 @@
 package com.example.myapplication.tabviewpager
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import com.applikeysolutions.cosmocalendar.listeners.OnMonthChangeListener
-import com.applikeysolutions.cosmocalendar.model.Month
-import com.applikeysolutions.cosmocalendar.selection.OnDaySelectedListener
-import com.applikeysolutions.cosmocalendar.selection.SingleSelectionManager
-import com.applikeysolutions.cosmocalendar.view.CalendarView
+import androidx.fragment.app.Fragment
 import com.example.myapplication.R
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.github.mikephil.charting.data.PieData
+import com.github.mikephil.charting.data.PieDataSet
+import com.github.mikephil.charting.data.PieEntry
+import com.github.mikephil.charting.formatter.PercentFormatter
+import com.github.mikephil.charting.utils.MPPointF
 import kotlinx.android.synthetic.main.layout_calendar.view.*
-import java.text.SimpleDateFormat
-import java.util.*
+
 
 class FragmentTabCalendar : Fragment() {
+    private val tabTextList = arrayListOf("Calendar", "HOME", "STATS")
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.layout_calendar, container, false)
-        view.calendar.isShowDaysOfWeekTitle = false
-        var calendarView: CalendarView = view.calendar as CalendarView
+        val pieChart = view.piechart
+        val time = ArrayList<PieEntry>()
+        val listColors = ArrayList<Int>()
+        
+        // 여기 value에 데이터 값 넣어주세요
+        time.add(PieEntry(3f, "공부"))
+        listColors.add(resources.getColor(R.color.btnBackColor))
+        time.add(PieEntry(7f, "휴식"))
+        listColors.add(resources.getColor(R.color.cancelBtnBackColor))
 
-        // 목표치 달성했는지 판단하여 달력에 표시하는메서드
-        isAchived()
+        val dataSet = PieDataSet(time, "");
+        dataSet.colors = listColors
+        dataSet.setDrawIcons(false)
+        dataSet.sliceSpace = 3f
+        dataSet.iconsOffset = MPPointF(0F, 40F)
+        dataSet.selectionShift = 5f
+        dataSet.valueFormatter = PercentFormatter(pieChart)
 
-        // 캘린더 월 변경 리스너 -> isAchived() 호출
-        view.calendar.setOnMonthChangeListener(object : OnMonthChangeListener {
-            override fun onMonthChanged(month: Month?) { // 달이 변경되었을때
-//                isAchived()
-                Toast.makeText(view.context,"달 변경 됨", Toast.LENGTH_SHORT).show()
-            }
-        })
+        val pieData = PieData(dataSet)
+        pieData.setValueTextSize(17f)
+        pieChart.data = pieData
+        pieChart.setUsePercentValues(true)
+        pieChart.highlightValues(null)
+        pieChart.invalidate()
+        pieChart.description.isEnabled = false
+        pieChart.animateXY(1000, 1000);
 
         // 선택된 날짜가 변경 되었을때
         view.calendar.selectionManager = SingleSelectionManager(OnDaySelectedListener {
