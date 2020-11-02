@@ -98,14 +98,14 @@ class TimerActivity : AppCompatActivity() {
             Log.d("타이머", "" + uid)
             time = chronometer.base-SystemClock.elapsedRealtime()
             val ref =FirebaseDatabase.getInstance().getReference("/calendar/$uid/$date/result")
-            Log.d("time", "" + ref)
-            ref.setValue(Cal(time))
-            Log.d("time", "" + time)
-            AlertDialog.Builder(this)
-                .setMessage("기록되었습니다.")
-                .setPositiveButton("OK",
-                    DialogInterface.OnClickListener { dialog, which -> finish() })
-                .show()
+            Log.d("time",""+ref)
+            ref.child("totalStudyTime").setValue(time)
+            Log.d("time",""+time)
+            CustomDialog(this)
+                .setMessage("기록되었습니다")
+                .setPositiveButton("나가기") { finish()
+                }.setNegativeButton("계속하기") {null
+                }.show()
         }
     }
     private fun initSensor() {
