@@ -2,12 +2,14 @@ package com.example.myapplication.tabviewpager
 
 import android.app.DatePickerDialog
 import android.app.DatePickerDialog.OnDateSetListener
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.example.myapplication.GoalActivity
 import com.example.myapplication.R
 import com.example.myapplication.models.DailyGoal
 import com.example.myapplication.models.FocusStudyTime
@@ -72,9 +74,14 @@ class FragmentTabStats : Fragment() {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val value = dataSnapshot.getValue<Result>()
                     val total = TimeCalculator().msToStringTime(value?.totalStudyTime!!)
-                    view.totalTime.text = "총 공부시간 : $total"
-
-                    Log.d(TAG,"real = ${value?.realStudyTime}")
+                    // 총 공부 시간
+                    view.timeText.text = "$total"
+                    // 실제 공부한 시간
+                    view.realTime.text = "${value.realStudyTime}"
+                    // 공부에 집중한 시간
+                    val list = value.focusStudyTime
+                    view.recommendTime.text = "${list.toString()}"
+                    //최대 공부 시간 : maxFocusStudyTime
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -98,9 +105,11 @@ class FragmentTabStats : Fragment() {
             }
         }
         // [END read_message]
+        view.goalButton.setOnClickListener {
+            startActivity(Intent(this.activity,GoalActivity::class.java))
+        }
         return view
     }
-
     private fun goalWrite(myRef: DatabaseReference) {
         // [START write_message]
         // Write a message to the database
