@@ -7,7 +7,7 @@ data class Studies(
 data class Study(
     var startTime: String = "",
     var endTime: String = "",
-    var realStudy: Map<String, RealStudy> = emptyMap()
+    var realStudy: List<RealStudy> = emptyList()
 )
 
 data class RealStudy(

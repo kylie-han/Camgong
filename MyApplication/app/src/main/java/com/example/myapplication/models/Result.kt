@@ -5,7 +5,7 @@ import com.google.firebase.database.IgnoreExtraProperties
 
 @IgnoreExtraProperties
 data class Result (
-    var focusStudyTime: Map<String,FocusStudyTime> = emptyMap(),
+    var focusStudyTime: List<FocusStudyTime> = emptyList(),
     var maxFocusStudyTime: String = "",
     var realStudyTime: String = "",
     var totalStudyTime: Long = 0L
