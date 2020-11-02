@@ -1,3 +1,4 @@
+
 package com.example.myapplication.tabviewpager
 
 import android.os.Bundle
@@ -31,15 +32,12 @@ import kotlin.collections.ArrayList
 class FragmentTabCalendar : Fragment() {
     private val tabTextList = arrayListOf("Calendar", "HOME", "STATS")
 
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.layout_calendar, container, false)
-        val pieChart = view.piechart
-        val time = ArrayList<PieEntry>()
-        val listColors = ArrayList<Int>()
+
         view.calendar.isShowDaysOfWeekTitle = false
         var calendarView: CalendarView = view.calendar as CalendarView
 
@@ -53,6 +51,27 @@ class FragmentTabCalendar : Fragment() {
                 Toast.makeText(view.context,"달 변경 됨", Toast.LENGTH_SHORT).show()
             }
         })
+
+
+        // 선택된 날짜가 변경 되었을때
+        view.calendar.selectionManager = SingleSelectionManager(OnDaySelectedListener {
+            if (view.calendar.selectedDates.size <= 0)
+                return@OnDaySelectedListener
+            // 선택된 일자
+            var date = selectedDay(calendarView)
+
+            // 파이어베이스에서 값 불러와서 textView에 표시 + 비율을 받아서 차트 그리기
+            getDate(view, date)
+            drawPieChart(view)
+        })// end of Listener
+        return view
+    }
+
+    // 공부비율과 휴식비율을 받아서 차트를 만듦
+    private fun drawPieChart(view: View) {
+        val pieChart = view.piechart
+        val time = ArrayList<PieEntry>()
+        val listColors = ArrayList<Int>()
 
         // 여기 value에 데이터 값 넣어주세요
         time.add(PieEntry(3f, "공부"))
@@ -76,20 +95,9 @@ class FragmentTabCalendar : Fragment() {
         pieChart.invalidate()
         pieChart.description.isEnabled = false
         pieChart.animateXY(1000, 1000);
-
-        // 선택된 날짜가 변경 되었을때
-        view.calendar.selectionManager = SingleSelectionManager(OnDaySelectedListener {
-            if (view.calendar.selectedDates.size <= 0)
-                return@OnDaySelectedListener
-            // 선택된 일자
-            var date = selectedDay(calendarView)
-
-            // 파이어베이스에서 값 불러와서 textView에 표시
-            getDate(view, date)
-        })// end of Listener
-        return view
     }
 
+    // 선택된 날짜를 가져와서 문자열로 리턴
     private fun selectedDay(calendarView: CalendarView): String {
         var selected: List<Calendar> = calendarView.selectedDates
         var date:String = "더미~"
