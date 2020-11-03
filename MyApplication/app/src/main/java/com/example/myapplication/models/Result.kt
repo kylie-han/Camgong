@@ -6,8 +6,8 @@ import com.google.firebase.database.IgnoreExtraProperties
 @IgnoreExtraProperties
 data class Result (
     var focusStudyTime: List<FocusStudyTime> = emptyList(),
-    var maxFocusStudyTime: String = "",
-    var realStudyTime: String = "",
+    var maxFocusStudyTime: Long = 0L,
+    var realStudyTime: Long = 0L,
     var totalStudyTime: Long = 0L
 ){
     @Exclude

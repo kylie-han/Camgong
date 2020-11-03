@@ -1,7 +1,7 @@
 package com.example.myapplication.models
 
 data class Studies(
-    var studies: Map<String,Study> = emptyMap()
+    var studies: List<Study> = emptyList()
 )
 
 data class Study(
