@@ -50,6 +50,6 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth:16.0.3'
     implementation 'com.google.android.gms:play-services-auth:16.0.0'
 
-    // 코스모 캘린더 사용하기 위해
-    implementation 'com.github.applikeysolutions:cosmocalendar:1.0.4'
+    // Material 캘린더 사용을 위해
+    implementation 'com.prolificinteractive:material-calendarview:1.4.3'
 }
