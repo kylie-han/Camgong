@@ -3,6 +3,7 @@ package com.example.myapplication.tabviewpager
 import android.app.DatePickerDialog
 import android.app.DatePickerDialog.OnDateSetListener
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -71,7 +72,7 @@ class FragmentTabStats : Fragment() {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val value = dataSnapshot.getValue<Result>()
                     val total = TimeCalculator().msToStringTime(value?.totalStudyTime!!)
-                    view.textView.text = "총 공부시간 : $total"
+                    view.totalTime.text = "총 공부시간 : $total"
 
                     Log.d(TAG,"real = ${value?.realStudyTime}")
                 }
@@ -82,7 +83,7 @@ class FragmentTabStats : Fragment() {
                 }
             })
             view.calendarText.text = "$year.$month.$date"
-    
+
             val tv_date = view.calendarText
             tv_date.setOnClickListener {
                 context?.let { it1 ->
