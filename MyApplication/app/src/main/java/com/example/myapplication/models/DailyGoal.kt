@@ -5,5 +5,5 @@ import com.google.firebase.database.IgnoreExtraProperties
 @IgnoreExtraProperties
 data class DailyGoal(
     var goalStatus: Boolean = false,
-    var goalTime: String = ""
+    var goalTime: Long = 0L
 )
