@@ -60,34 +60,39 @@ class FragmentTabStats : Fragment() {
         if (user == null) {
             Log.d(TAG, "user doesn't exist")
         } else {
-//            var uid = user.uid
-//            val database = Firebase.database
-//            val today = TimeCalculator().today()
-//            val myRef = database.getReference("calendar/$uid/$today")
-//
-//            goalWrite(myRef)
-//            resultWrite(myRef)
-//
-//            // [START read_message]
-//            myRef.child("/result").addValueEventListener(object : ValueEventListener {
-//                override fun onDataChange(dataSnapshot: DataSnapshot) {
-//                    val value = dataSnapshot.getValue<Result>()
-//                    val total = TimeCalculator().msToStringTime(value?.totalStudyTime!!)
-//                    // 총 공부 시간
-//                    view.timeText.text = "$total"
-//                    // 실제 공부한 시간
-//                    view.realTime.text = "${value.realStudyTime}"
-//                    // 공부에 집중한 시간
-//                    val list = value.focusStudyTime
-//                    view.recommendTime.text = "${list.toString()}"
-//                    //최대 공부 시간 : maxFocusStudyTime
-//                }
-//
-//                override fun onCancelled(error: DatabaseError) {
-//                    // Failed to read value
-//                    Log.w(TAG, "Failed to read value.", error.toException())
-//                }
-//            })
+            var uid = user.uid
+            val database = Firebase.database
+            val today = TimeCalculator().today()
+            val myRef = database.getReference("calendar/$uid/$today")
+
+            resultWrite(myRef)
+
+            // [START read_message]
+            myRef.child("/result").addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val value = dataSnapshot.getValue<Result>()
+                    if(value == null){
+                        Log.d(TAG,"value가 없음")
+                    }else {
+                        val total = TimeCalculator().msToStringTime(value.totalStudyTime)
+                        // 총 공부 시간
+                        view.timeText.text = "$total"
+                        // 실제 공부한 시간
+                        val real = TimeCalculator().msToStringTime(value.realStudyTime)
+                        view.realTime.text = "$real"
+                        // 공부에 집중한 시간
+                        val list = value.focusStudyTime
+                        view.recommendTime.text = "${list.toString()}"
+                        //최대 공부 시간 : maxFocusStudyTime
+
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Failed to read value
+                    Log.w(TAG, "Failed to read value.", error.toException())
+                }
+            })
             // [END read_message]
             view.calendarText.text = "$year.$month.$date"
 
@@ -109,27 +114,17 @@ class FragmentTabStats : Fragment() {
         }
         return view
     }
-//    private fun goalWrite(myRef: DatabaseReference) {
-//        // [START write_message]
-//        // Write a message to the database
-//        val destination = myRef.child("/dailyGoal")
-//        val goalStatus = false
-//        val timeString = TimeCalculator().currentTime()
-//        val goalTime = TimeCalculator().stringToLong(timeString)
-//        val dailyGoal = DailyGoal(goalStatus, goalTime)
-//        destination.setValue(dailyGoal)
-//        // [END write_message]
-//    }
-//    private fun resultWrite(myRef: DatabaseReference){
-//        val destination = myRef.child("/result")
-//        val focusTime = FocusStudyTime("13:00:00","14:00:00")
-//        val focusStudyTime: List<FocusStudyTime> = listOf(focusTime)
-//        val maxFocusStudyTime = "00:30:00"
-//        val realStudyTime = "01:30:00"
-//        val totalStudyTime = 0L
-//        val result = Result(focusStudyTime,maxFocusStudyTime,realStudyTime,totalStudyTime)
-//        destination.setValue(result)
-//    }
+
+    private fun resultWrite(myRef: DatabaseReference){
+        val destination = myRef.child("/result")
+        val focusTime = FocusStudyTime("13:00:00","14:00:00")
+        val focusStudyTime: List<FocusStudyTime> = listOf(focusTime)
+        val maxFocusStudyTime = TimeCalculator().stringToLong("00:30:00")
+        val realStudyTime = TimeCalculator().stringToLong("01:30:00")
+        val totalStudyTime = realStudyTime+10000
+        val result = Result(focusStudyTime,maxFocusStudyTime,realStudyTime,totalStudyTime)
+        destination.setValue(result)
+    }
 
     private fun updateLabel() {
         val myFormat = "yyyy.MM.dd"

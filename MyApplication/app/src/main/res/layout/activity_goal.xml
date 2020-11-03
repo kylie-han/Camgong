@@ -5,10 +5,36 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".GoalActivity">
+    <TextView
+        android:id="@+id/text_view"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        tools:ignore="MissingConstraints" />
     <TimePicker
         android:id="@+id/time_picker"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:timePickerMode="spinner"
+        app:layout_constraintTop_toBottomOf="@+id/text_view"
+        android:layout_marginTop="50dp"
         />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/time_picker"
+        >
+        <Button
+            android:id="@+id/button_get"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="현재시간"
+            />
+        <Button
+            android:id="@+id/button_set"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="목표 설정"
+            />
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
