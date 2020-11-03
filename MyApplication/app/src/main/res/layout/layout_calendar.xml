@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="455dp"
         app:connectedDayIconPosition="top"
-        app:currentDayTextColor="#f79256"
+        app:currentDayTextColor="#FFFFFF"
         app:firstDayOfTheWeek="sunday"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -109,6 +109,5 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/calendar"
-        android:text="테스트"
-        android:textSize="24sp" />
+        android:textSize="10sp" />
 </RelativeLayout>

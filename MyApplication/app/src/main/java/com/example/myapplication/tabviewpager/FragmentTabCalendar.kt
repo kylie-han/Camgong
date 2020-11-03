@@ -14,6 +14,8 @@ import com.applikeysolutions.cosmocalendar.selection.OnDaySelectedListener
 import com.applikeysolutions.cosmocalendar.selection.SingleSelectionManager
 import com.applikeysolutions.cosmocalendar.view.CalendarView
 import com.example.myapplication.R
+import com.example.myapplication.models.DailyGoal
+import com.example.myapplication.models.Result
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
@@ -55,8 +57,9 @@ class FragmentTabCalendar : Fragment() {
                 if(date.length==8) res = date.slice(4..7) + date.slice(0..1) // 10월 이상
                 else res = date.slice(3..6) + "0" + date.slice(0..1) // 9월 이하
                 Log.e("달이 변경되었음", res)
-                isAchived(view, res)
-//                Toast.makeText(view.context,"달 변경 됨 -> \n${res}", Toast.LENGTH_SHORT).show()
+                isAchived(view, res) // 목표 달성여부 달력에 표시
+
+                getMonthInfo(view, res)
             }
         })
 
@@ -68,7 +71,7 @@ class FragmentTabCalendar : Fragment() {
             var date = selectedDay(calendarView)
 
             // 파이어베이스에서 값 불러와서 textView에 표시 + 비율을 받아서 차트 그리기
-            getDate(view, date)
+            getDayInfo(view, date)
             drawPieChart(view)
         })// end of Listener
         return view
@@ -121,39 +124,74 @@ class FragmentTabCalendar : Fragment() {
         return date
     }
 
+    // 1달의 공부 정보를 가져와서 표시
+    private fun getMonthInfo(view: View, month: String) {
+        val uid = FirebaseAuth.getInstance().uid
+        val ins = FirebaseDatabase.getInstance()
+        for (i in 1..31){
+            var date = ""
+            if(i<10) date = month + "0$i"
+            else date = month + "$i"
+            var ref = ins.getReference("/calendar/$uid/$date/result")
+
+            ref.addListenerForSingleValueEvent(object :ValueEventListener{
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if(snapshot.key.equals("result")){
+                        val data = snapshot.getValue(Result :: class.java)
+
+                        if(data != null){
+                            var total = data.totalStudyTime
+                            var focus = data.maxFocusStudyTime
+                            var real = data.realStudyTime
+
+
+
+
+                        }
+                    }
+                }// end of onDataChange
+
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(view.context, "월별 계산 실패\n$date", Toast.LENGTH_SHORT).show()
+                }
+
+            })
+        }// end of for
+
+    }// end of getMonthInfo()
+
     // 각 일자의 목표 달성여부를 판단하여 달력에 표시 -> 미완성
     // 실행되면 1~31일 훑어서 goalstatus 값에 따라 잘 가져오는것 까지 확인하였음 -> 값에따라 캘린더의 해당날짜에 표시
     private fun isAchived(view: View, month: String) {
         val uid = FirebaseAuth.getInstance().uid
         val ins = FirebaseDatabase.getInstance()
-        var str = "출력값\n"
         for (i in 1..31){
-            var date = ""
+            var date = ""  // YYYYMMDD
             if(i<10) date = month + "0$i"
             else date = month + "$i"
-            Log.e("date 값", date)
-            var ref = ins.getReference("/calendar/$uid/$date/dailygoal")
+            var ref = ins.getReference("/calendar/$uid/$date/dailyGoal")
 
             ref.addListenerForSingleValueEvent(object : ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
                     Log.e("메서드 date 값", date)
-                    if(snapshot.key.equals("dailygoal")){
-                        val goal = snapshot.getValue(DailyGoal::class.java)
-
-                        if(goal != null){ // 목표가 설정되어있을경우
-                            Log.e("달성 여부", goal.goalstatus.toString()) // 있는경우 잘 실행됨
-                            if(goal.goalstatus){ // 달성한 경우
+                    if(snapshot.key.equals("dailyGoal")){
+                        val data = snapshot.getValue(DailyGoal::class.java)
+                        var str = "기본값"
+                        if(data != null){ // 목표가 설정되어있을경우
+                            Log.e("달성 여부", data.goalStatus.toString()) // 값이 있는경우 잘 실행됨
+                            if(data.goalStatus){ // 달성한 경우
                                 // 파란색으로 해당날짜에 표시
-                                Toast.makeText(view.context, "목표 달성\n$date", Toast.LENGTH_SHORT).show()
-                                str += date+"목표 달성\n"
+                                str = view.tv_calendar.text.toString()
+                                view.tv_calendar.text = "$str" + date+"목표 달성\n"
                             }else{ // 달성 못한 경우
                                 // 빨간색으로 해당날짜에 표시
-                                Toast.makeText(view.context, "목표 달성 실패\n$date", Toast.LENGTH_SHORT).show()
-                                str += date +"목표 실패\n"
+                                str = view.tv_calendar.text.toString()
+                                view.tv_calendar.text = "$str" + date+"목표 실패\n"
                             }
                         }else{ // 목표가 없는 경우, 회색으로 해당날짜에 표시
-                            Toast.makeText(view.context, "목표 없음\n$date", Toast.LENGTH_SHORT).show()
-                            str += date + "목표 없음\n"
+//                            Toast.makeText(view.context, "목표 없음\n$date", Toast.LENGTH_SHORT).show()
+                            str = view.tv_calendar.text.toString()
+                            view.tv_calendar.text = "$str" + date+"목표 없음\n"
                         }
                     }
                 }
@@ -164,12 +202,10 @@ class FragmentTabCalendar : Fragment() {
 
             })
         }// end of for
-        Log.e("str 출력", str)
-        Toast.makeText(view.context, str, Toast.LENGTH_LONG).show()
-        view.tv_calendar.text = str
     } // end of isAchived()
 
-    fun getDate(view: View, date: String) {
+    // 1일 공부정보 가져옴 -> 모델 변경 필요
+    fun getDayInfo(view: View, date: String) {
         val uid = FirebaseAuth.getInstance().uid
         val ref = FirebaseDatabase.getInstance().getReference("/calendar/$uid/$date/result")
 
@@ -228,9 +264,4 @@ data class ResultTime(
     var totalstudytime: String = "",
     var realstudytime: String = "",
     var maxfocusstudytime: String = ""
-)
-
-data class DailyGoal(
-    var goalstatus: Boolean = false,
-    var goaltime: String = ""
 )
