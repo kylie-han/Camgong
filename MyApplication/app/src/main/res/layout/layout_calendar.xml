@@ -1,15 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:layout_alignParentBottom="false"
+    android:layout_centerHorizontal="false"
+    android:orientation="vertical"
+    android:weightSum="1">
 
-    <CalendarView
-        android:id="@+id/calendarView"
+    <com.applikeysolutions.cosmocalendar.view.CalendarView
+        android:id="@+id/calendar"
+        android:layout_width="match_parent"
+        android:layout_height="455dp"
+        app:connectedDayIconPosition="top"
+        app:currentDayTextColor="#f79256"
+        app:firstDayOfTheWeek="sunday"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:orientation="horizontal"
+        app:selectedDayBackgroundColor="#FFEACA"
+        app:selectedDayBackgroundEndColor="#f79256"
+        app:selectedDayBackgroundStartColor="#f79256"
+        app:selectedDayTextColor="#FFFFFF"
+        app:selectionType="single"
+        app:weekendDayTextColor="#ef4550">
+        <!--        selectionType: range로 바꾸면 범위 설정 가능-->
+
+    </com.applikeysolutions.cosmocalendar.view.CalendarView>
+
+    <com.github.mikephil.charting.charts.PieChart
+        android:id="@+id/piechart"
+        android:layout_width="273dp"
+        android:layout_height="255dp"
+        android:layout_below="@id/view_pager_in"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/view_pager_in"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_below="@id/tab_in"
+        android:layout_weight="1"
+        />
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_in"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:tabGravity="fill"
+        android:layout_below="@id/calendar"
+        app:tabIndicatorColor="#C7A2CD"
+        app:tabIndicatorGravity="top"
+        app:tabMaxWidth="0dp"
+        app:tabMode="fixed" />
+
+    <TextView
+        android:id="@+id/msg1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:layout_editor_absoluteX="30dp"
-        tools:layout_editor_absoluteY="83dp"
-        tools:ignore="MissingConstraints" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_below="@+id/piechart"
+        android:text="총 공부시간"
+        android:textSize="30sp" />
+
+    <TextView
+        android:id="@+id/msg2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/msg1"
+        android:text="실제 공부시간"
+        android:textSize="30sp" />
+
+    <TextView
+        android:id="@+id/msg3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/msg2"
+        android:text="최대 집중시간"
+        android:textSize="30sp" />
+
+    <TextView
+        android:id="@+id/msg4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/msg3"
+        android:text="휴식 시간"
+        android:textSize="30sp" />
+
+    <TextView
+        android:id="@+id/msg5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/msg4"
+        android:text="공부 비율"
+        android:textSize="30sp" />
+
+    <TextView
+        android:id="@+id/msg6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/msg5"
+        android:text="휴식 비율"
+        android:textSize="30sp" />
+</RelativeLayout>
