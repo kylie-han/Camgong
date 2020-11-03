@@ -13,7 +13,7 @@ import com.google.android.gms.vision.face.Face
  * graphic overlay view.
  */
 
-internal class FaceGraphic(overlay: GraphicOverlay?) : Graphic(overlay!!) {
+internal class FaceGraphic(overlay: GraphicOverlay?, val face:Face) : Graphic(overlay!!) {
     private val mFacePositionPaint: Paint
     private val mIdPaint: Paint
     private val mBoxPaint: Paint
@@ -24,6 +24,7 @@ internal class FaceGraphic(overlay: GraphicOverlay?) : Graphic(overlay!!) {
     private val mFaceHappiness = 0f
     fun setId(id: Int) {
         mFaceId = id
+
     }
 
     /**
@@ -94,8 +95,9 @@ internal class FaceGraphic(overlay: GraphicOverlay?) : Graphic(overlay!!) {
     }
 
     init {
+        mFace = face
         mCurrentColorIndex = (mCurrentColorIndex + 1) % COLOR_CHOICES.size
-        val selectedColor = COLOR_CHOICES[mCurrentColorIndex]
+        val selectedColor = Color.GREEN
         mFacePositionPaint = Paint()
         mFacePositionPaint.color = selectedColor
         mIdPaint = Paint()

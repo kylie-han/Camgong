@@ -35,11 +35,25 @@ class FragmentTabHome  : Fragment() {
         val month = calendar.get(Calendar.MONTH) +1
         val day = calendar.get(Calendar.DATE)
         view.homeDate.text = "$year.$month.$day"
-        val date = "$year$month$day"
+        var date = "$year"
+        if(month<10)
+        {
+            date+="0$month"
+        }else
+        {
+            date+="$month"
+        }
+        if(day<10)
+        {
+            date+="0$day"
+        }else
+        {
+            date+="$day"
+        }
         val uid = FirebaseAuth.getInstance().uid
         val ref =FirebaseDatabase.getInstance().getReference("/calendar/$uid/$date/result")
         var time: Long= 0
-
+        Log.d("파베",""+ref)
         ref.addValueEventListener(object : ValueEventListener{
             override fun onCancelled(error: DatabaseError) {
             }
@@ -51,7 +65,8 @@ class FragmentTabHome  : Fragment() {
                         val result = snapshot.getValue(Result::class.java)
                         if(result!=null)
                         {
-                            Log.d("파베1",""+result.totalStudyTime)
+                            Log.d("파베1",""+result)
+                            Log.d("파베2",""+snapshot)
                             time = result.totalStudyTime
                             view.chronometer.base= SystemClock.elapsedRealtime()+time
                         }
