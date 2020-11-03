@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import com.example.myapplication.R
 import com.example.myapplication.models.DailyGoal
 import com.example.myapplication.models.Result
+import com.example.myapplication.util.AchiveDecorator
 import com.example.myapplication.util.SaturdayDecorator
 import com.example.myapplication.util.SundayDecorator
 import com.github.mikephil.charting.data.PieData
@@ -39,22 +40,20 @@ class FragmentTabCalendar : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.layout_calendar, container, false)
 
+        // 캘린더 초기 설정
         initCalendar(view)
 
-        var month = SimpleDateFormat("YYYYMM").format(Calendar.getInstance().time)
-
-        month = getStringDate(CalendarDay.today())
-
         // 목표치 달성했는지 판단하여 달력에 표시하는메서드
-        isAchived(view, month)
+        isAchived(view, CalendarDay.today())
 
         // 선택된 날짜가 변경 되었을때
         view.calendar.setOnDateChangedListener(object : OnDateSelectedListener{
             override fun onDateSelected(widget: MaterialCalendarView, date: CalendarDay, selected: Boolean) {
-                var selected:String = getStringDate(date, true) // 선택된 일자
+
+//                var selected:String = getStringDate(date, true) // 선택된 일자
 
                 // 파이어베이스에서 값 불러와서 textView에 표시 + 비율을 받아서 차트 그리기
-                getDayInfo(view, selected)
+                getDayInfo(view, date)
                 drawPieChart(view)
             }
         })// end of setOnDateChangedListener
@@ -65,12 +64,12 @@ class FragmentTabCalendar : Fragment() {
             override fun onMonthChanged(widget: MaterialCalendarView, date: CalendarDay) { // 달이 변경되었을때
                 var res = getStringDate(date)
 
-                isAchived(view, res) // 목표 달성여부 달력에 표시
+                isAchived(view, date) // 목표 달성여부 달력에 표시
 
-                getMonthInfo(view, res)
+//                getMonthInfo(view, date) // 해당 월의 공부정보 가져옴
             }
 
-        })
+        })// end of setOnMonthChangedListener
 
         return view
     }
@@ -141,7 +140,7 @@ class FragmentTabCalendar : Fragment() {
     }
 
     // 1일 공부정보 가져옴 -> 모델 변경 필요
-    fun getDayInfo(view: View, date: String) {
+    fun getDayInfo(view: View, date: CalendarDay) {
         val uid = FirebaseAuth.getInstance().uid
         val ref = FirebaseDatabase.getInstance().getReference("/calendar/$uid/$date/result")
 
@@ -196,51 +195,53 @@ class FragmentTabCalendar : Fragment() {
     } // end of getDate()
 
     // 1달의 공부 정보를 가져와서 표시
-    private fun getMonthInfo(view: View, month: String) {
-        val uid = FirebaseAuth.getInstance().uid
-        val ins = FirebaseDatabase.getInstance()
-        for (i in 1..31){
-            var date = ""
-            if(i<10) date = month + "0$i"
-            else date = month + "$i"
-            var ref = ins.getReference("/calendar/$uid/$date/result")
-
-            ref.addListenerForSingleValueEvent(object :ValueEventListener{
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if(snapshot.key.equals("result")){
-                        val data = snapshot.getValue(Result :: class.java)
-
-                        if(data != null){
-                            var total = data.totalStudyTime
-                            var focus = data.maxFocusStudyTime
-                            var real = data.realStudyTime
-
-
-
-
-                        }
-                    }
-                }// end of onDataChange
-
-                override fun onCancelled(error: DatabaseError) {
-                    Toast.makeText(view.context, "월별 계산 실패\n$date", Toast.LENGTH_SHORT).show()
-                }
-
-            })
-        }// end of for
-
-    }// end of getMonthInfo()
+//    private fun getMonthInfo(view: View, : CalendarDay) {
+//        val uid = FirebaseAuth.getInstance().uid
+//        val ins = FirebaseDatabase.getInstance()
+//        for (i in 1..31){
+//            var date = ""
+//            if(i<10) date = month + "0$i"
+//            else date = month + "$i"
+//            var ref = ins.getReference("/calendar/$uid/$date/result")
+//
+//            ref.addListenerForSingleValueEvent(object :ValueEventListener{
+//                override fun onDataChange(snapshot: DataSnapshot) {
+//                    if(snapshot.key.equals("result")){
+//                        val data = snapshot.getValue(Result :: class.java)
+//
+//                        if(data != null){
+//                            var total = data.totalStudyTime
+//                            var focus = data.maxFocusStudyTime
+//                            var real = data.realStudyTime
+//
+//
+//
+//
+//                        }
+//                    }
+//                }// end of onDataChange
+//
+//                override fun onCancelled(error: DatabaseError) {
+//                    Toast.makeText(view.context, "월별 계산 실패\n$date", Toast.LENGTH_SHORT).show()
+//                }
+//
+//            })
+//        }// end of for
+//
+//    }// end of getMonthInfo()
 
     // 각 일자의 목표 달성여부를 판단하여 달력에 표시 -> 미완성
     // 실행되면 1~31일 훑어서 goalstatus 값에 따라 잘 가져오는것 까지 확인하였음 -> 값에따라 캘린더의 해당날짜에 표시
-    private fun isAchived(view: View, month: String) {
+    private fun isAchived(view: View, current: CalendarDay) {
         val uid = FirebaseAuth.getInstance().uid
         val ins = FirebaseDatabase.getInstance()
         for (i in 1..31){
-            var date = ""  // YYYYMMDD
-            if(i<10) date = month + "0$i"
-            else date = month + "$i"
+            var date = getStringDate(current)  // YYYYMMDD
+            if(i<10) date += "0$i"
+            else date += "$i"
+
             var ref = ins.getReference("/calendar/$uid/$date/dailyGoal")
+            val day = CalendarDay.from(current.year, current.month, i) // 현재 조회중인 날짜
 
             ref.addListenerForSingleValueEvent(object : ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
@@ -253,16 +254,19 @@ class FragmentTabCalendar : Fragment() {
                             if(data.goalStatus){ // 달성한 경우
                                 // 파란색으로 해당날짜에 표시
                                 str = view.tv_calendar.text.toString()
-                                view.tv_calendar.text = "$str" + date+"목표 달성\n"
+                                view.tv_calendar.text = "$str" + date+"목표 달성             "
+                                view.calendar.addDecorators(AchiveDecorator(day,1))
                             }else{ // 달성 못한 경우
                                 // 빨간색으로 해당날짜에 표시
                                 str = view.tv_calendar.text.toString()
-                                view.tv_calendar.text = "$str" + date+"목표 실패\n"
+                                view.tv_calendar.text = "$str" + date+"목표 실패             "
+                                view.calendar.addDecorators(AchiveDecorator(day,2))
                             }
                         }else{ // 목표가 없는 경우, 회색으로 해당날짜에 표시
 //                            Toast.makeText(view.context, "목표 없음\n$date", Toast.LENGTH_SHORT).show()
                             str = view.tv_calendar.text.toString()
-                            view.tv_calendar.text = "$str" + date+"목표 없음\n"
+                            view.tv_calendar.text = "$str" + date+"목표 없음             "
+                            view.calendar.addDecorators(AchiveDecorator(day,3))
                         }
                     }
                 }
