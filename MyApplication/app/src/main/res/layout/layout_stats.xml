@@ -42,10 +42,11 @@
         android:id="@+id/linearLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintStart_toStartOf="@+id/timeText"
-        app:layout_constraintTop_toBottomOf="@+id/timeText"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/calendarText"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintStart_toStartOf="@+id/timeText"
+        app:layout_constraintTop_toBottomOf="@+id/timeText">
 
         <TextView
             android:id="@+id/realTime"
@@ -57,24 +58,48 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="동안 집중했어요"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="동안 집중했어요" />
+            android:text="최대" />
+
+        <TextView
+            android:id="@+id/maxFocusTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/max_focus_time" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="동안 집중 했어요"/>
 
         <TextView
             android:id="@+id/recommendTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="@string/recommend_time"
-            app:layout_constraintTop_toBottomOf="@+id/realTime" />
+            android:text="@string/recommend_time" />
 
-        <Button
-            android:id="@+id/goalButton"
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="목표시간은"
             android:layout_marginTop="10dp"
-            android:text="목표 설정"
             app:layout_constraintTop_toBottomOf="@+id/recommendTime" />
+        <TextView
+            android:id="@+id/goalTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="goal Time" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="입니다"/>
+
     </LinearLayout>
 
     <ScrollView
@@ -87,6 +112,7 @@
         tools:layout_editor_absoluteX="294dp">
 
         <TableLayout
+            android:id="@+id/table_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/cancelBtnBackColor"

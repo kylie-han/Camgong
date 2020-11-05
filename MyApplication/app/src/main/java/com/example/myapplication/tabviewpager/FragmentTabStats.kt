@@ -81,13 +81,42 @@ class FragmentTabStats : Fragment() {
                         val real = TimeCalculator().msToStringTime(value.realStudyTime)
                         view.realTime.text = "$real"
                         // 공부에 집중한 시간
-                        val list = value.focusStudyTime
-                        view.recommendTime.text = "${list.toString()}"
+                        var list = value.focusStudyTime
+                        var string:String = ""
+                        list = list.sortedWith(Comparator { data1, data2 ->
+                            (TimeCalculator().stringToLong(data2.endTime)-TimeCalculator().stringToLong(data2.startTime))
+                                .compareTo((TimeCalculator().stringToLong(data1.endTime))-TimeCalculator().stringToLong(data1.startTime))
+                        })
+
+                        for (i in list.indices){
+                            if(i == 3)break
+                            string += "${list[i].startTime} ~ ${list[i].endTime}\n"
+                        }
+                        view.recommendTime.text = "${string}"
                         //최대 공부 시간 : maxFocusStudyTime
+                        val max = TimeCalculator().msToStringTime(value.maxFocusStudyTime)
+                        view.maxFocusTime.text = "${max}"
 
                     }
                 }
 
+                override fun onCancelled(error: DatabaseError) {
+                    // Failed to read value
+                    Log.w(TAG, "Failed to read value.", error.toException())
+                }
+            })
+
+            myRef.child("/dailyGoal").addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val value = dataSnapshot.getValue<DailyGoal>()
+                    if (value == null) {
+                        Log.d(TAG, "value가 없음")
+                    } else {
+                        val goal = TimeCalculator().msToStringTime(value.goalTime)
+                        view.goalTime.text = "$goal"
+                        Log.d(TAG, "$goal")
+                    }
+                }
                 override fun onCancelled(error: DatabaseError) {
                     // Failed to read value
                     Log.w(TAG, "Failed to read value.", error.toException())
@@ -109,21 +138,29 @@ class FragmentTabStats : Fragment() {
                 }
             }
         }
-        view.goalButton.setOnClickListener {
+        view.table_layout.setOnLongClickListener {
             startActivity(Intent(this.activity,GoalActivity::class.java))
+            return@setOnLongClickListener true
         }
+
         return view
     }
 
     private fun resultWrite(myRef: DatabaseReference){
         val destination = myRef.child("/result")
         val focusTime = FocusStudyTime("13:00:00","14:00:00")
-        val focusStudyTime: List<FocusStudyTime> = listOf(focusTime)
+        val focusStudyTime1 = FocusStudyTime("10:00:00","12:00:00")
+        val focusStudyTime3 = FocusStudyTime("00:00:00","04:00:00")
+        val focusStudyTime4 = FocusStudyTime("04:00:01","04:01:00")
+        val focusStudyTime5 = FocusStudyTime("04:05:00","04:08:00")
+        val focusStudyTime: List<FocusStudyTime> = listOf(focusTime,focusStudyTime1,focusStudyTime3,focusStudyTime4,focusStudyTime5)
         val maxFocusStudyTime = TimeCalculator().stringToLong("00:30:00")
         val realStudyTime = TimeCalculator().stringToLong("01:30:00")
         val totalStudyTime = realStudyTime+10000
         val result = Result(focusStudyTime,maxFocusStudyTime,realStudyTime,totalStudyTime)
         destination.setValue(result)
+
+
     }
 
     private fun updateLabel() {
