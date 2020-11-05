@@ -32,18 +32,18 @@ class TimeCalculator {
     fun currentTime(): String{
         return current.format(timeFormatter)
     }
-//    fun subTime(startTime: String, endTime: String): String? {
-//        val start = LocalTime.parse(startTime, timeFormatter)
-//        val end = LocalTime.parse(endTime, timeFormatter)
-//        val absSeconds = abs(Duration.between(start,end).seconds)
-//        return String.format(
-//            "%02d:%02d:%02d.%03d",
-//            absSeconds / (60*60*1000),
-//            absSeconds % (60*60*1000) / 60,
-//            absSeconds % (60*60*1000) / (60*60),
-//            absSeconds % 1000
-//        )
-//    }
+    fun subTime(startTime: String, endTime: String): String {
+        val start = LocalTime.parse(startTime, timeFormatter)
+        val end = LocalTime.parse(endTime, timeFormatter)
+        val absSeconds = abs(Duration.between(start,end).seconds)
+        return String.format(
+            "%02d:%02d:%02d.%03d",
+            absSeconds / (60*60*1000),
+            absSeconds % (60*60*1000) / 60,
+            absSeconds % (60*60*1000) / (60*60),
+            absSeconds % 1000
+        )
+    }
 //    fun addTime(times: Map<String, FocusStudyTime>){
 //
 //
