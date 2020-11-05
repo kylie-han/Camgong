@@ -20,7 +20,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TimePicker
-            android:id="@+id/timePicker"
+            android:id="@+id/time_picker"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
 
@@ -32,7 +32,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="목표 설정"
-            app:layout_constraintTop_toBottomOf="@id/timePicker" />
+            app:layout_constraintTop_toBottomOf="@id/time_picker" />
 
 
     </LinearLayout>
