@@ -47,5 +47,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/calendar"
-        android:textSize="10sp" />
+        android:text="일별 정보"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/tv_month"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_calendar"
+        android:text="월별 정보"
+        android:textSize="15sp"/>
 </RelativeLayout>
