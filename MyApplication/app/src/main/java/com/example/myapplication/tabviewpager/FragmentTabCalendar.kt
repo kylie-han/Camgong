@@ -28,9 +28,9 @@ import com.google.firebase.database.ValueEventListener
 import com.prolificinteractive.materialcalendarview.*
 import kotlinx.android.synthetic.main.layout_calendar.view.*
 import java.text.SimpleDateFormat
+import java.time.LocalTime
 import java.util.*
 import kotlin.collections.ArrayList
-import
 
 
 class FragmentTabCalendar : Fragment() {
@@ -155,28 +155,26 @@ class FragmentTabCalendar : Fragment() {
                     val cal = snapshot.getValue(Result::class.java)
 
                     if(cal != null){
-                        // 받아온 값 그대로 출력
-                        var str = "총 공부시간: " + TimeCalculator().msToStringTime(cal.totalStudyTime) +"\n"
-                        str += "실제 공부시간: " + TimeCalculator().msToStringTime(cal.realStudyTime)+"\n"
+                        val tc = TimeCalculator()
 
+                        // 총 공부시간, 실제 공부시간, 최대집중시간, 휴식시간
+                        val totalTime = cal.totalStudyTime
+                        val realTime = cal.realStudyTime
+                        val focusTime = cal.maxFocusStudyTime
+                        val breakTime = totalTime - realTime
 
-                        // Parsing할때 사용할 포맷 지정
-                        val format = SimpleDateFormat("HH:mm:ss")
+                        // 값 출력
+                        var str = "총 공부시간: ${tc.msToStringTime(totalTime)}\n"
+                        str += "실제 공부시간: ${tc.msToStringTime(realTime)}\n"
+                        str += "최대 집중 시간: ${tc.msToStringTime(focusTime)}\n"
+                        str += "휴식시간: ${tc.msToStringTime(breakTime)}\n"
+                        str += "공부시간 비율: ${tc.percentage(realTime,totalTime)}%\n"
+                        str += "휴식시간 비율: ${tc.percentage(breakTime,totalTime)}%"
 
-                        // 시간 계산을 위해 String -> Date 형식으로 Parsing 1970.01.01로부터 지난 시간을 각각 저장
-                        val total = format.parse(cal.totalstudytime).time // 총 공부시간(ms)
-                        val real = format.parse(cal.realstudytime).time // 실제 공부시간(ms)
-                        val zero = format.parse("00:00:00").time // 순수한 시간 계산을 위한 기준값
-
-
-                        val breakTime = total - real // 휴식시간 (ms)
-                        view.msg4.text = "${breakTime / (1000*60)}분" // 분으로 출력
+                        view.tv_calendar.text = str
 
                         // 휴식, 공부 비율 계산, toDouble은 소수점을 출력하기 위해서 사용하였음
-                        val breakRatio = (breakTime.toDouble() / (total - zero) * 100).toInt()
-                        val studyRatio = 100 - breakRatio
-                        view.msg5.text = "공부 비율: ${studyRatio}%"
-                        view.msg6.text = "휴식 비율: ${breakRatio}%"
+//                        drawPieChart(view, realTime, breakTime)
                     }else{ // 정보가 없을경우 모든 값을 없음으로 처리
                         view.tv_calendar.text = "정보가 없음"
                     }
@@ -184,7 +182,7 @@ class FragmentTabCalendar : Fragment() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                view.msg5.text = "Failed"
+                view.tv_calendar.text = "Failed"
                 println("Failed to read Value")
             }
 
@@ -251,20 +249,19 @@ class FragmentTabCalendar : Fragment() {
                             Log.e("달성 여부", data.goalStatus.toString()) // 값이 있는경우 잘 실행됨
                             if(data.goalStatus){ // 달성한 경우
                                 // 파란색으로 해당날짜에 표시
-                                str = view.tv_calendar.text.toString()
-                                view.tv_calendar.text = "$str" + date+"목표 달성             "
+//                                str = view.tv_calendar.text.toString()
+//                                view.tv_calendar.text = "$str" + date+"목표 달성             "
                                 view.calendar.addDecorators(AchiveDecorator(day,1))
                             }else{ // 달성 못한 경우
                                 // 빨간색으로 해당날짜에 표시
-                                str = view.tv_calendar.text.toString()
-                                view.tv_calendar.text = "$str" + date+"목표 실패             "
+//                                str = view.tv_calendar.text.toString()
+//                                view.tv_calendar.text = "$str" + date+"목표 실패             "
                                 view.calendar.addDecorators(AchiveDecorator(day,2))
                             }
-                        }else{ // 목표가 없는 경우, 회색으로 해당날짜에 표시
+                        }else{ // 목표가 없는 경우, 회색으로 해당날짜에 표시(삭제됨)
 //                            Toast.makeText(view.context, "목표 없음\n$date", Toast.LENGTH_SHORT).show()
-                            str = view.tv_calendar.text.toString()
-                            view.tv_calendar.text = "$str" + date+"목표 없음             "
-                            view.calendar.addDecorators(AchiveDecorator(day,3))
+//                            str = view.tv_calendar.text.toString()
+//                            view.tv_calendar.text = "$str" + date+"목표 없음             "
                         }
                     }
                 }
