@@ -11,9 +11,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.myapplication.GoalActivity
 import com.example.myapplication.R
-import com.example.myapplication.models.DailyGoal
-import com.example.myapplication.models.FocusStudyTime
-import com.example.myapplication.models.Result
+import com.example.myapplication.models.*
 import com.example.myapplication.util.TimeCalculator
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -65,7 +63,7 @@ class FragmentTabStats : Fragment() {
             val today = TimeCalculator().today()
             val myRef = database.getReference("calendar/$uid/$today")
 
-            resultWrite(myRef)
+//            studyWrite(myRef)
 
             // [START read_message]
             myRef.child("/result").addValueEventListener(object : ValueEventListener {
@@ -81,7 +79,7 @@ class FragmentTabStats : Fragment() {
                         val real = TimeCalculator().msToStringTime(value.realStudyTime)
                         view.realTime.text = "$real"
                         // 공부에 집중한 시간
-                        var list = value.focusStudyTime
+                        var list = value.focusStudyTime.toList()
                         var string:String = ""
                         list = list.sortedWith(Comparator { data1, data2 ->
                             (TimeCalculator().stringToLong(data2.endTime)-TimeCalculator().stringToLong(data2.startTime))
@@ -114,7 +112,6 @@ class FragmentTabStats : Fragment() {
                     } else {
                         val goal = TimeCalculator().msToStringTime(value.goalTime)
                         view.goalTime.text = "$goal"
-                        Log.d(TAG, "$goal")
                     }
                 }
                 override fun onCancelled(error: DatabaseError) {
@@ -149,18 +146,24 @@ class FragmentTabStats : Fragment() {
     private fun resultWrite(myRef: DatabaseReference){
         val destination = myRef.child("/result")
         val focusTime = FocusStudyTime("13:00:00","14:00:00")
-        val focusStudyTime1 = FocusStudyTime("10:00:00","12:00:00")
-        val focusStudyTime3 = FocusStudyTime("00:00:00","04:00:00")
-        val focusStudyTime4 = FocusStudyTime("04:00:01","04:01:00")
-        val focusStudyTime5 = FocusStudyTime("04:05:00","04:08:00")
-        val focusStudyTime: List<FocusStudyTime> = listOf(focusTime,focusStudyTime1,focusStudyTime3,focusStudyTime4,focusStudyTime5)
+        val focusStudyTime: MutableList<FocusStudyTime> = mutableListOf(focusTime)
         val maxFocusStudyTime = TimeCalculator().stringToLong("00:30:00")
         val realStudyTime = TimeCalculator().stringToLong("01:30:00")
         val totalStudyTime = realStudyTime+10000
         val result = Result(focusStudyTime,maxFocusStudyTime,realStudyTime,totalStudyTime)
         destination.setValue(result)
+    }
 
-
+    private fun studyWrite(myRef: DatabaseReference){
+        val destination = myRef.child("/studies")
+        val realstart = "13:30:00"
+        val realend = "13:50:00"
+        val realStudy = RealStudy(realstart, realend)
+        val startTime = "13:00:00"
+        val endTime = "14:00:00"
+        val study = Study(startTime,endTime, mutableListOf(realStudy))
+        var studies: Studies = Studies(mutableListOf(study))
+        destination.setValue(studies)
     }
 
     private fun updateLabel() {
