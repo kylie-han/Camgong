@@ -13,6 +13,7 @@ class TimeCalculator {
     private val current = LocalDateTime.now(ZoneId.of("Asia/Seoul"))
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
+    private val timeFormatters = DateTimeFormatter.ofPattern("HH:mm:ss")
 
     /**
      * today() : 오늘 날짜
@@ -31,7 +32,7 @@ class TimeCalculator {
     fun currentTime(): String{
         return current.format(timeFormatter)
     }
-    fun subTime(startTime: String, endTime: String): String? {
+    fun subTime(startTime: String, endTime: String): String {
         val start = LocalTime.parse(startTime, timeFormatter)
         val end = LocalTime.parse(endTime, timeFormatter)
         val absSeconds = abs(Duration.between(start,end).seconds)
@@ -43,22 +44,22 @@ class TimeCalculator {
             absSeconds % 1000
         )
     }
-    fun addTime(times: Map<String, FocusStudyTime>){
-
-
-    }
-    fun dateToString(date: LocalDate): String{
-        return date.format(dateFormatter)
-    }
-    fun timeToString(time: LocalTime): String{
-        return time.format(timeFormatter)
-    }
-    fun stringToDate(date: String): LocalDate {
-        return LocalDate.parse(date, dateFormatter)
-    }
-    fun stringToTime(time: String): LocalTime {
-        return LocalTime.parse(time, timeFormatter)
-    }
+//    fun addTime(times: Map<String, FocusStudyTime>){
+//
+//
+//    }
+//    fun dateToString(date: LocalDate): String{
+//        return date.format(dateFormatter)
+//    }
+//    fun timeToString(time: LocalTime): String{
+//        return time.format(timeFormatter)
+//    }
+//    fun stringToDate(date: String): LocalDate {
+//        return LocalDate.parse(date, dateFormatter)
+//    }
+//    fun stringToTime(time: String): LocalTime {
+//        return LocalTime.parse(time, timeFormatter)
+//    }
     fun msToStringTime(milliSec: Long): String{
         val ms = abs(milliSec)
         return String.format(
@@ -70,7 +71,12 @@ class TimeCalculator {
         )
     }
     fun stringToLong(time: String):Long{
-        val localtime = LocalTime.parse(time,timeFormatter)
+        var localtime: LocalTime
+        if (time.length <9){
+            localtime = LocalTime.parse(time,timeFormatters)
+        }else{
+            localtime = LocalTime.parse(time,timeFormatter)
+        }
         val hours = localtime.hour.toLong()*60*60*1000
         val min = localtime.minute*60*1000
         val sec = localtime.second*1000

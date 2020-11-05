@@ -1,13 +1,13 @@
 package com.example.myapplication.models
 
 data class Studies(
-    var studies: Map<String,Study> = emptyMap()
+    var studies: MutableList<Study> = mutableListOf()
 )
 
 data class Study(
     var startTime: String = "",
     var endTime: String = "",
-    var realStudy: List<RealStudy> = emptyList()
+    var realStudy: MutableList<RealStudy> = mutableListOf()
 )
 
 data class RealStudy(

@@ -1,66 +1,60 @@
 package com.example.myapplication
 
 import android.Manifest
+import android.app.Activity
 import android.app.AlertDialog
+import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.ImageFormat
-import android.hardware.Camera
-import android.hardware.Sensor
-import android.hardware.SensorManager
-import android.hardware.camera2.*
-import android.media.ExifInterface
-import android.media.ImageReader
-import android.os.*
-import android.util.DisplayMetrics
+import android.os.Bundle
+import android.os.SystemClock
 import android.util.Log
-import android.util.SparseIntArray
 import android.view.KeyEvent
-import android.view.SurfaceHolder
+import android.view.View
 import android.view.WindowManager
-import android.widget.FrameLayout
-import android.widget.RelativeLayout
-import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.example.myapplication.timecamera.CameraSourcePreview
+import com.example.myapplication.timecamera.GraphicOverlay
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.vision.CameraSource
+import com.google.android.gms.vision.Detector.Detections
+import com.google.android.gms.vision.MultiProcessor
+import com.google.android.gms.vision.Tracker
+import com.google.android.gms.vision.face.Face
+import com.google.android.gms.vision.face.FaceDetector
+import com.google.android.gms.vision.face.FaceDetector.Builder
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_timer.*
+import java.io.IOException
 import java.util.*
 
 
 class TimerActivity : AppCompatActivity() {
-    private lateinit var mSurfaceViewHolder: SurfaceHolder
-    private lateinit var mImageReader: ImageReader
-    private lateinit var mCameraDevice: CameraDevice
-    private lateinit var mPreviewBuilder: CaptureRequest.Builder
-    private lateinit var mSession: CameraCaptureSession
-    private var mHandler: Handler? = null
+    private val TAG = "FaceTracker"
 
-    private lateinit var mAccelerometer: Sensor
-    private lateinit var mMagnetometer: Sensor
-    private lateinit var mSensorManager: SensorManager
+    private var mCameraSource: CameraSource? = null
 
-    private val deviceOrientation: DeviceOrientation by lazy { DeviceOrientation() }
-    private var mHeight: Int = 0
-    private var mWidth:Int = 0
+    private var mPreview: CameraSourcePreview? = null
+    private var mGraphicOverlay: GraphicOverlay? = null
 
-    var mCameraId = CAMERA_FRONT
-    companion object
-    {
-        const val CAMERA_BACK = "0"
-        const val CAMERA_FRONT = "1"
+    private val RC_HANDLE_GMS = 9001
 
-        private val ORIENTATIONS = SparseIntArray()
+    // permission request codes need to be < 256
+    private val RC_HANDLE_CAMERA_PERM = 2
 
+    private class GraphicFaceTrackerFactory(mGraphicOverlay:GraphicOverlay) : MultiProcessor.Factory<Face> {
+        var Overlay : GraphicOverlay? = null;
         init {
-            ORIENTATIONS.append(ExifInterface.ORIENTATION_NORMAL, 0)
-            ORIENTATIONS.append(ExifInterface.ORIENTATION_ROTATE_90, 90)
-            ORIENTATIONS.append(ExifInterface.ORIENTATION_ROTATE_180, 180)
-            ORIENTATIONS.append(ExifInterface.ORIENTATION_ROTATE_270, 270)
+            Overlay = mGraphicOverlay
+        }
+        override fun create(face: Face): Tracker<Face> {
+            return GraphicFaceTracker(Overlay!!)
         }
     }
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,10 +75,15 @@ class TimerActivity : AppCompatActivity() {
         var time: Long= intent.getLongExtra("time", 0)
         chronometer.base=SystemClock.elapsedRealtime()+time;
         chronometer.start();
+        mPreview = findViewById<View>(R.id.preview) as CameraSourcePreview
+        mGraphicOverlay = findViewById<View>(R.id.faceOverlay) as GraphicOverlay
 
-        initSensor()
-        initView()
-
+        val rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+        if (rc == PackageManager.PERMISSION_GRANTED) {
+            createCameraSource()
+        } else {
+            requestCameraPermission()
+        }
 
         btnPause.setOnClickListener {
             val intent = Intent(this, TimerActivity::class.java)
@@ -98,184 +97,191 @@ class TimerActivity : AppCompatActivity() {
             Log.d("타이머", "" + uid)
             time = chronometer.base-SystemClock.elapsedRealtime()
             val ref =FirebaseDatabase.getInstance().getReference("/calendar/$uid/$date/result")
-            Log.d("time",""+ref)
-            ref.child("totalStudyTime").setValue(time)
-            Log.d("time",""+time)
-            CustomDialog(this)
-                .setMessage("기록되었습니다")
-                .setPositiveButton("나가기") { finish()
-                }.setNegativeButton("계속하기") {null
-                }.show()
+            Log.d("파베 경로", "" + ref)
+            ref.setValue(Cal(time))
+            Log.d("time1111", "" + time)
+            AlertDialog.Builder(this)
+                .setMessage("기록되었습니다.")
+                .setPositiveButton("OK",
+                    DialogInterface.OnClickListener { dialog, which -> finish() })
+                .show()
         }
-    }
-    private fun initSensor() {
-        mSensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        mMagnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
-    }
-    private fun initView() {
-        with(DisplayMetrics()){
-            windowManager.defaultDisplay.getMetrics(this)
-            mHeight = heightPixels
-            mWidth = widthPixels
-        }
-
-        mSurfaceViewHolder = surfaceView.holder
-        mSurfaceViewHolder.addCallback(object : SurfaceHolder.Callback {
-            override fun surfaceCreated(holder: SurfaceHolder) {
-                initCameraAndPreview()
-            }
-
-            override fun surfaceDestroyed(holder: SurfaceHolder) {
-                mCameraDevice.close()
-            }
-
-            override fun surfaceChanged(
-                holder: SurfaceHolder, format: Int,
-                width: Int, height: Int
-            ) {
-
-            }
-        })
-
-    }
-
-    fun initCameraAndPreview() {
-        val handlerThread = HandlerThread("CAMERA2")
-        handlerThread.start()
-        mHandler = Handler(handlerThread.looper)
-
-        openCamera()
-    }
-
-    private fun openCamera() {
-        try {
-            val mCameraManager = this.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-            val characteristics = mCameraManager.getCameraCharacteristics(mCameraId)
-            val map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
-
-            val largestPreviewSize = map!!.getOutputSizes(ImageFormat.JPEG)[0]
-            setAspectRatioTextureView(largestPreviewSize.height, largestPreviewSize.width)
-
-            mImageReader = ImageReader.newInstance(
-                largestPreviewSize.width,
-                largestPreviewSize.height,
-                ImageFormat.JPEG,
-                7
-            )
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED
-            ) return
-
-            mCameraManager.openCamera(mCameraId, deviceStateCallback, mHandler)
-        } catch (e: CameraAccessException) {
-            Toast.makeText(this, "카메라를 열지 못했습니다.", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private val deviceStateCallback = object : CameraDevice.StateCallback() {
-        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-        override fun onOpened(camera: CameraDevice) {
-            mCameraDevice = camera
-            try {
-                takePreview()
-            } catch (e: CameraAccessException) {
-                e.printStackTrace()
-            }
-        }
-
-        override fun onDisconnected(camera: CameraDevice) {
-            mCameraDevice.close()
-        }
-
-        override fun onError(camera: CameraDevice, error: Int) {
-            Toast.makeText(this@TimerActivity, "카메라를 열지 못했습니다.", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    @Throws(CameraAccessException::class)
-    fun takePreview() {
-        mPreviewBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
-        mPreviewBuilder.addTarget(mSurfaceViewHolder.surface)
-        mCameraDevice.createCaptureSession(
-            listOf(mSurfaceViewHolder.surface, mImageReader.surface), mSessionPreviewStateCallback, mHandler
-        )
-    }
-
-    private val mSessionPreviewStateCallback = object : CameraCaptureSession.StateCallback() {
-        override fun onConfigured(session: CameraCaptureSession) {
-            mSession = session
-            try {
-                // Key-Value 구조로 설정
-                // 오토포커싱이 계속 동작
-                mPreviewBuilder.set(
-                    CaptureRequest.CONTROL_AF_MODE,
-                    CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE
-                )
-                //필요할 경우 플래시가 자동으로 켜짐
-                mPreviewBuilder.set(
-                    CaptureRequest.CONTROL_AE_MODE,
-                    CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH
-                )
-                mSession.setRepeatingRequest(mPreviewBuilder.build(), null, mHandler)
-            } catch (e: CameraAccessException) {
-                e.printStackTrace()
-            }
-
-        }
-
-        override fun onConfigureFailed(session: CameraCaptureSession) {
-            Toast.makeText(this@TimerActivity, "카메라 구성 실패", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        mSensorManager.registerListener(
-            deviceOrientation.eventListener, mAccelerometer, SensorManager.SENSOR_DELAY_UI
-        )
-        mSensorManager.registerListener(
-            deviceOrientation.eventListener, mMagnetometer, SensorManager.SENSOR_DELAY_UI
-        )
-    }
-
-    override fun onPause() {
-        super.onPause()
-        mSensorManager.unregisterListener(deviceOrientation.eventListener)
-    }
-
-    private fun setAspectRatioTextureView(ResolutionWidth: Int, ResolutionHeight: Int) {
-        if (ResolutionWidth > ResolutionHeight) {
-            val newWidth = mWidth
-            val newHeight = mWidth * ResolutionWidth / ResolutionHeight
-            updateTextureViewSize(newWidth, newHeight)
-
-        } else {
-            val newWidth = mWidth
-            val newHeight = mWidth * ResolutionHeight / ResolutionWidth
-            updateTextureViewSize(newWidth, newHeight)
-        }
-
-    }
-
-    private fun updateTextureViewSize(viewWidth: Int, viewHeight: Int) {
-        Log.d("ViewSize", "TextureView Width : $viewWidth TextureView Height : $viewHeight")
-        surfaceView.layoutParams = RelativeLayout.LayoutParams(viewWidth, viewHeight)
     }
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         when (keyCode) {
-                KeyEvent.KEYCODE_BACK -> CustomDialog(this)
-                .setMessage("기록되었습니다")
-                .setPositiveButton("나가기") { finish()
-                }.setNegativeButton("계속하기") {null
-                }.show()
+            KeyEvent.KEYCODE_BACK -> {
+                AlertDialog.Builder(this)
+                    .setMessage("기록되었습니다.")
+                    .setPositiveButton("OK",
+                        DialogInterface.OnClickListener { dialog, which -> finish() })
+                    .show()
 
+            }
         }
         return true
     }
+    private fun requestCameraPermission() {
+        Log.w(TAG, "Camera permission is not granted. Requesting permission")
+        val permissions = arrayOf(Manifest.permission.CAMERA)
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(
+                this,
+                Manifest.permission.CAMERA
+            )
+        ) {
+            ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_CAMERA_PERM)
+            return
+        }
+        val thisActivity: Activity = this
+        val listener = View.OnClickListener {
+            ActivityCompat.requestPermissions(
+                thisActivity, permissions,
+                RC_HANDLE_CAMERA_PERM
+            )
+        }
+        Snackbar.make(
+            mGraphicOverlay!!, R.string.permission_camera_rationale,
+            Snackbar.LENGTH_INDEFINITE
+        )
+            .setAction(R.string.ok, listener)
+            .show()
+    }
 
 
+    private fun createCameraSource() {
+        val context: Context = applicationContext
+        val detector: FaceDetector = Builder(context)
+            .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
+            .setProminentFaceOnly(true)
+            .build()
+        detector.setProcessor(
+            MultiProcessor.Builder(GraphicFaceTrackerFactory(mGraphicOverlay!!))
+                .build()
+        )
+        if (!detector.isOperational()) {
+
+            Log.w(TAG, "Face detector dependencies are not yet available.")
+        }
+        mCameraSource = CameraSource.Builder(context, detector)
+            .setRequestedPreviewSize(640, 480)
+            .setFacing(CameraSource.CAMERA_FACING_FRONT)
+            .setRequestedFps(30.0f)
+            .build()
+    }
+
+    /**
+     * Restarts the camera.
+     */
+    override fun onResume() {
+        super.onResume()
+        startCameraSource()
+    }
+
+    /**
+     * Stops the camera.
+     */
+    override fun onPause() {
+        super.onPause()
+        mPreview!!.stop()
+    }
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (mCameraSource != null) {
+            mCameraSource!!.release()
+        }
+    }
+
+    private fun startCameraSource() {
+
+        // check that the device has play services available.
+        val code = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(
+            applicationContext
+        )
+        if (code != ConnectionResult.SUCCESS) {
+            val dlg: Dialog =
+                GoogleApiAvailability.getInstance().getErrorDialog(this, code, RC_HANDLE_GMS)
+            dlg.show()
+        }
+        if (mCameraSource != null) {
+            try {
+                mPreview!!.start(mCameraSource, mGraphicOverlay)
+            } catch (e: IOException) {
+                Log.e(TAG, "Unable to start camera source.", e)
+                mCameraSource!!.release()
+                mCameraSource = null
+            }
+        }
+    }
+
+    private class GraphicFaceTracker(overlay: GraphicOverlay): Tracker<Face>() {
+        private var mOverlay: GraphicOverlay? = null
+        private var mFaceGraphic: FaceGraphic? = null
+
+        override fun onNewItem(faceId: Int, item: Face?) {
+            mFaceGraphic?.setId(faceId)
+        }
+
+        /**
+         * Update the position/characteristics of the face within the overlay.
+         */
+        override fun onUpdate(detectionResults: Detections<Face?>, face: Face?) {
+            mOverlay?.add(mFaceGraphic!!)
+            mFaceGraphic?.updateFace(face)
+        }
+
+        /**
+         * Hide the graphic when the corresponding face was not detected.  This can happen for
+         * intermediate frames temporarily (e.g., if the face was momentarily blocked from
+         * view).
+         */
+        override fun onMissing(detectionResults: Detections<Face?>) {
+            mOverlay?.remove(mFaceGraphic)
+        }
+
+        /**
+         * Called when the face is assumed to be gone for good. Remove the graphic annotation from
+         * the overlay.
+         */
+        override fun onDone() {
+            mOverlay?.remove(mFaceGraphic)
+        }
+
+        init {
+            mOverlay = overlay
+            mFaceGraphic = FaceGraphic(overlay)
+        }
+
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        if (requestCode != RC_HANDLE_CAMERA_PERM) {
+            Log.d(TAG, "Got unexpected permission result: $requestCode")
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+            return
+        }
+        if (grantResults.size != 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "Camera permission granted - initialize the camera source")
+            // we have permission, so create the camerasource
+            createCameraSource()
+            return
+        }
+        Log.e(
+            TAG, "Permission not granted: results len = " + grantResults.size +
+                    " Result code = " + if (grantResults.size > 0) grantResults[0] else "(empty)"
+        )
+        val listener =
+            DialogInterface.OnClickListener { dialog, id -> finish() }
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Face Tracker sample")
+            .setMessage(R.string.no_camera_permission)
+            .setPositiveButton(R.string.ok, listener)
+            .show()
+    }
 }
 
 data class Cal(

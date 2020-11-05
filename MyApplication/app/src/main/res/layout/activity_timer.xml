@@ -14,32 +14,41 @@
         android:layout_height="80dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="530dp"
+        android:layout_marginTop="600dp"
         android:background="@drawable/round_button"
         android:clickable="true"
         android:contentDescription="@string/text_default"
         android:focusable="true"
         app:srcCompat="@android:drawable/ic_media_pause" />
 
-    <Chronometer
-        android:id="@+id/chronometer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerInParent="false"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="70dp"
-        android:format="00:%s"
-        android:textColor="@color/textBlack"
-        android:textSize="55sp" />
 
-    <SurfaceView
-        android:id="@+id/surfaceView"
+
+
+    <com.example.myapplication.timecamera.CameraSourcePreview
+        android:id="@+id/preview"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="match_parent"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="180dp" />
+        >
+        <Chronometer
+            android:id="@+id/chronometer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerInParent="false"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="70dp"
+            android:format="00:%s"
+            android:textColor="@color/textBlack"
+            android:textSize="55sp" />
+        <com.example.myapplication.timecamera.GraphicOverlay
+            android:id="@+id/faceOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </com.example.myapplication.timecamera.CameraSourcePreview>
+
 
 </RelativeLayout>
 
