@@ -43,54 +43,6 @@
         app:tabMode="fixed" />
 
     <TextView
-        android:id="@+id/msg1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/piechart"
-        android:text="총 공부시간"
-        android:textSize="30sp" />
-
-    <TextView
-        android:id="@+id/msg2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/msg1"
-        android:text="실제 공부시간"
-        android:textSize="30sp" />
-
-    <TextView
-        android:id="@+id/msg3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/msg2"
-        android:text="최대 집중시간"
-        android:textSize="30sp" />
-
-    <TextView
-        android:id="@+id/msg4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/msg3"
-        android:text="휴식 시간"
-        android:textSize="30sp" />
-
-    <TextView
-        android:id="@+id/msg5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/msg4"
-        android:text="공부 비율"
-        android:textSize="30sp" />
-
-    <TextView
-        android:id="@+id/msg6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/msg5"
-        android:text="휴식 비율"
-        android:textSize="30sp" />
-
-    <TextView
         android:id="@+id/tv_calendar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

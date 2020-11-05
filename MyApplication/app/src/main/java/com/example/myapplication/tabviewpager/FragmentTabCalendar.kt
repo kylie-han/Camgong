@@ -11,9 +11,10 @@ import androidx.fragment.app.Fragment
 import com.example.myapplication.R
 import com.example.myapplication.models.DailyGoal
 import com.example.myapplication.models.Result
-import com.example.myapplication.util.AchiveDecorator
-import com.example.myapplication.util.SaturdayDecorator
-import com.example.myapplication.util.SundayDecorator
+//import com.example.myapplication.util.AchiveDecorator
+//import com.example.myapplication.util.SaturdayDecorator
+//import com.example.myapplication.util.SundayDecorator
+import com.example.myapplication.util.*
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
@@ -29,6 +30,7 @@ import kotlinx.android.synthetic.main.layout_calendar.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
+import
 
 
 class FragmentTabCalendar : Fragment() {
@@ -140,8 +142,9 @@ class FragmentTabCalendar : Fragment() {
     }
 
     // 1일 공부정보 가져옴 -> 모델 변경 필요
-    fun getDayInfo(view: View, date: CalendarDay) {
+    fun getDayInfo(view: View, calendarDay: CalendarDay) {
         val uid = FirebaseAuth.getInstance().uid
+        val date = getStringDate(calendarDay, true)
         val ref = FirebaseDatabase.getInstance().getReference("/calendar/$uid/$date/result")
 
         ref.addValueEventListener(object : ValueEventListener {
@@ -149,13 +152,13 @@ class FragmentTabCalendar : Fragment() {
                 // result부분 가져오기
                 if(snapshot.key.equals("result")){
                     // DB에서 해당 값 가져오기, ResultTime 클래스에 맞게 자동으로 저장됨
-                    val cal = snapshot.getValue(ResultTime::class.java)
+                    val cal = snapshot.getValue(Result::class.java)
 
                     if(cal != null){
                         // 받아온 값 그대로 출력
-                        view.msg3.text = "${cal.maxfocusstudytime}"
-                        view.msg2.text = "${cal.realstudytime}"
-                        view.msg1.text = "${cal.totalstudytime}"
+                        var str = "총 공부시간: " + TimeCalculator().msToStringTime(cal.totalStudyTime) +"\n"
+                        str += "실제 공부시간: " + TimeCalculator().msToStringTime(cal.realStudyTime)+"\n"
+
 
                         // Parsing할때 사용할 포맷 지정
                         val format = SimpleDateFormat("HH:mm:ss")
@@ -175,12 +178,7 @@ class FragmentTabCalendar : Fragment() {
                         view.msg5.text = "공부 비율: ${studyRatio}%"
                         view.msg6.text = "휴식 비율: ${breakRatio}%"
                     }else{ // 정보가 없을경우 모든 값을 없음으로 처리
-                        view.msg4.text = "없음"
-                        view.msg3.text = "없음"
-                        view.msg5.text = "없음"
-                        view.msg6.text = "없음"
-                        view.msg2.text = "없음"
-                        view.msg1.text = "없음"
+                        view.tv_calendar.text = "정보가 없음"
                     }
                 }// end of outer if()
             }
@@ -280,9 +278,3 @@ class FragmentTabCalendar : Fragment() {
     } // end of isAchived()
 
 }
-
-data class ResultTime(
-    var totalstudytime: String = "",
-    var realstudytime: String = "",
-    var maxfocusstudytime: String = ""
-)
