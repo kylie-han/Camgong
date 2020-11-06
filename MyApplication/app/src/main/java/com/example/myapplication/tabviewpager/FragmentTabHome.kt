@@ -53,6 +53,7 @@ class FragmentTabHome  : Fragment() {
         val uid = FirebaseAuth.getInstance().uid
         val ref =FirebaseDatabase.getInstance().getReference("/calendar/$uid/$date/result")
         var time: Long= 0
+        var totalTime: Long= 0
         Log.d("파베",""+ref)
         ref.addValueEventListener(object : ValueEventListener{
             override fun onCancelled(error: DatabaseError) {
@@ -65,9 +66,8 @@ class FragmentTabHome  : Fragment() {
                         val result = snapshot.getValue(Result::class.java)
                         if(result!=null)
                         {
-                            Log.d("파베1",""+result)
-                            Log.d("파베2",""+snapshot)
-                            time = result.totalStudyTime
+                            time = result.realStudyTime
+                            totalTime = result.totalStudyTime
                             view.chronometer.base= SystemClock.elapsedRealtime()+time
                         }
                     }
@@ -78,6 +78,7 @@ class FragmentTabHome  : Fragment() {
             val intent = Intent(context, TimerActivity::class.java)
 
             intent.putExtra("time",time)
+            intent.putExtra("totalTime",totalTime)
             context?.let { it1 ->
                 CustomDialog(it1)
                     .setMessage("캠 스터디를 시작하시겠습니까?")

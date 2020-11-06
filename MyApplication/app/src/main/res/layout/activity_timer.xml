@@ -23,7 +23,29 @@
 
 
 
+    <Chronometer
+        android:id="@+id/totalStudy"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerInParent="false"
+        android:layout_centerHorizontal="false"
+        android:layout_marginTop="70dp"
+        android:format="00:%s"
+        android:textColor="@color/textBlack"
+        android:textSize="55sp" />
 
+    <Chronometer
+        android:id="@+id/noStudy"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerInParent="false"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="70dp"
+        android:format="00:%s"
+        android:textColor="@color/textBlack"
+        android:textSize="55sp" />
     <com.example.myapplication.timecamera.CameraSourcePreview
         android:id="@+id/preview"
         android:layout_width="match_parent"
@@ -42,6 +64,8 @@
             android:format="00:%s"
             android:textColor="@color/textBlack"
             android:textSize="55sp" />
+
+
         <com.example.myapplication.timecamera.GraphicOverlay
             android:id="@+id/faceOverlay"
             android:layout_width="match_parent"

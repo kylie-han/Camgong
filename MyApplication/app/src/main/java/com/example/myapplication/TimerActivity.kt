@@ -14,6 +14,7 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
+import android.widget.Chronometer
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.myapplication.models.Result
@@ -49,7 +50,13 @@ class TimerActivity : AppCompatActivity() {
     private val RC_HANDLE_GMS = 9001
     // permission request codes need to be < 256
     private val RC_HANDLE_CAMERA_PERM = 2
-
+    private var maxFocusStudyTime: Long = 0
+    private var noStudyTime: Long = 0
+    private var time: Long = 0
+    private var totalTime: Long = 0
+    private var lasttime: Long = 0
+    private var flag: Boolean = true
+    private var noFlag: Boolean = true
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // 상태바 숨기기
@@ -65,9 +72,14 @@ class TimerActivity : AppCompatActivity() {
         )
         setContentView(R.layout.activity_timer)
         var intent = getIntent()
-        var time: Long= intent.getLongExtra("time", 0)
-        chronometer.base=SystemClock.elapsedRealtime()+time;
-        chronometer.start();
+        time = intent.getLongExtra("time", 0)
+        totalTime = intent.getLongExtra("totalTime", 0)
+
+        chronometer.base=SystemClock.elapsedRealtime()+time
+        totalStudy?.base = SystemClock.elapsedRealtime()+totalTime
+        lasttime = time
+        chronometer.start()
+        totalStudy?.start()
         mPreview = findViewById<View>(R.id.preview) as CameraSourcePreview
         mGraphicOverlay = findViewById<View>(R.id.faceOverlay) as GraphicOverlay
 
@@ -100,13 +112,17 @@ class TimerActivity : AppCompatActivity() {
             {
                 date+="$day"
             }
+
             val uid = FirebaseAuth.getInstance().uid
             Log.d("타이머", "" + uid)
+            chronometer.stop()
+            totalStudy?.stop()
             time = chronometer.base-SystemClock.elapsedRealtime()
+            totalTime = totalStudy.base - SystemClock.elapsedRealtime()
+
             val ref =FirebaseDatabase.getInstance().getReference("/calendar/$uid/$date/result")
-            Log.d("파베 경로", "" + ref)
-            ref.setValue(Result(emptyList(),0,0,time))
-            Log.d("time1111", "" + time)
+            ref.setValue(Result(emptyList(),0,time,totalTime))
+
             AlertDialog.Builder(this)
                 .setMessage("기록되었습니다.")
                 .setPositiveButton("OK",
@@ -172,18 +188,59 @@ class TimerActivity : AppCompatActivity() {
                 override fun receiveDetections(detections: Detections<Face>) {
                     mGraphicOverlay?.clear()
                     var faces = detections?.detectedItems
+
+
                     if(faces.size()>0)
                     {
+                        if(faces.valueAt(0).isLeftEyeOpenProbability<0.1&&faces.valueAt(0).isRightEyeOpenProbability<0.1)
+                        { // 자고 있나?
+                            if(noFlag)
+                            {
+                                noStudy.base = SystemClock.elapsedRealtime()+0
+                                noFlag = false
+                            }else if((-10000)>(noStudy.base-SystemClock.elapsedRealtime()))
+                            {
+                                if(flag)
+                                {
+                                    lasttime = chronometer.base-SystemClock.elapsedRealtime()
+                                    chronometer.stop()
+                                    flag = false
+                                }
+                            }
+
+                        }
+                        else if(!flag){
+                            chronometer.base = SystemClock.elapsedRealtime()+lasttime
+                            chronometer.start()
+                            flag = true
+                            noFlag = true
+                        }
+
                         val graphic = FaceGraphic(mGraphicOverlay, faces.valueAt(0))
                         mGraphicOverlay?.add(graphic)
-                    }else{
-                        //
+
+
+                    }
+                    else{
+                        // 얼굴이 화면에 없음
+
+                        if(noFlag)
+                        {
+                            noStudy.base = SystemClock.elapsedRealtime()+0
+                            noFlag = false
+                        }else if((-10000)>(noStudy.base-SystemClock.elapsedRealtime()))
+                        {
+                            if(flag)
+                            {
+                                lasttime = chronometer.base-SystemClock.elapsedRealtime()
+                                chronometer.stop()
+                                flag = false
+                            }
+                        }
                     }
 
                 }
             }
-//            MultiProcessor.Builder(GraphicFaceTrackerFactory(mGraphicOverlay!!))
-//                .build()
         )
         if (!detector.isOperational()) {
 
