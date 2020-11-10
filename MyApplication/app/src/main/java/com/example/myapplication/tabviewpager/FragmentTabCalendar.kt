@@ -61,7 +61,7 @@ class FragmentTabCalendar : Fragment() {
                 getDayInfo(view, date)
 
                 for (i in 0..2)
-                    weekInfo[i] = 0
+                    weekInfo[i] = 0L
                 getWeekInfo(view, date)
             }
         })// end of setOnDateChangedListener
@@ -72,92 +72,12 @@ class FragmentTabCalendar : Fragment() {
             override fun onMonthChanged(widget: MaterialCalendarView, date: CalendarDay) { // 달이 변경되었을때
                 isAchived(view, date) // 목표 달성여부 달력에 표시
 
-                monthTotalTime = 0; monthRealTime = 0; monthFocusTime = 0;
+                monthTotalTime = 0L; monthRealTime = 0L; monthFocusTime = 0L;
                 getMonthInfo(view, date) // 해당 월의 공부정보 가져옴
             }
         })// end of setOnMonthChangedListener
 
         return view
-    }
-
-    // 주별 확인
-    private fun getWeekInfo(view: View, calendarDay: CalendarDay) {
-        val uid = FirebaseAuth.getInstance().uid
-        val ins = FirebaseDatabase.getInstance()
-
-        // 요일 확인하여 그 주의 일요일에해당하는 날짜 선택 (firstDayOfWeek가 계속 1로 나오네...)
-        val month = getStringDate(calendarDay)
-        var DoW = calendarDay.calendar.get(Calendar.DAY_OF_WEEK)
-        var day = calendarDay.day
-        when(DoW){
-            2 -> day -= 1
-            3 -> day -= 2
-            4 -> day -= 3
-            5 -> day -= 4
-            6 -> day -= 5
-            7 -> day -= 6
-            else -> null
-        }
-
-        for (i in day .. day+6){
-            var date = month
-            if(i<10) date += "0$i"
-            else date += "$i"
-            var ref = ins.getReference("/calendar/$uid/$date/result")
-
-            ref.addListenerForSingleValueEvent(object :ValueEventListener{
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if(snapshot.key.equals("result")){
-                        val data = snapshot.getValue(Result::class.java)
-                        if(data != null){
-                            weekInfo[0] += data.totalStudyTime
-                            weekInfo[1] += data.realStudyTime
-                            weekInfo[2] += data.maxFocusStudyTime
-                            weekInfo[3] += data.totalStudyTime - data.realStudyTime
-                            displayWeek(view)
-                        }
-                    }
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Toast.makeText(view.context, "일별 계산 실패\n$date", Toast.LENGTH_SHORT).show()
-                }
-
-            })// end of ref
-
-        }
-
-    }// end of getWeekInfo()
-
-    private fun displayWeek(view: View) {
-        if(weekInfo[0] == 0L) view.tv_month.text = "이번주에 공부한 내역이 없습니다."
-        else{
-            val tc = TimeCalculator()
-            weekInfo[3] = weekInfo[0] - weekInfo[1]
-            var str = "총 시간: ${tc.msToStringTime(weekInfo[0])}\n"
-            str += "실제 시간: ${tc.msToStringTime(weekInfo[1])}\n"
-            str += "최대 집중시간: ${tc.msToStringTime(weekInfo[2])}\n"
-            str += "휴식 시간: ${tc.msToStringTime(weekInfo[3])}\n"
-            str += "공부 비율: ${tc.percentage(weekInfo[1], weekInfo[0])}%"
-
-            view.tv_week.text = str
-        }
-    }
-
-    private fun displayMonth(view: View) {
-        if(monthTotalTime == 0L)
-            view.tv_month.text = "한달동안 공부한 내역이 없습니다."
-        else{
-            val tc = TimeCalculator()
-            monthBreakTime = monthTotalTime - monthRealTime
-            var str = "총 시간: ${tc.msToStringTime(monthTotalTime)}\n"
-            str += "실제 시간: ${tc.msToStringTime(monthRealTime)}\n"
-            str += "최대 집중시간: ${tc.msToStringTime(monthFocusTime)}\n"
-            str += "휴식 시간: ${tc.msToStringTime(monthBreakTime)}\n"
-            str += "공부 비율: ${tc.percentage(monthRealTime, monthTotalTime)}%"
-
-            view.tv_month.text = str
-        }
     }
 
     private fun initCalendar(view: View) {
@@ -225,7 +145,7 @@ class FragmentTabCalendar : Fragment() {
         pieChart.animateXY(1000, 1000);
     }
 
-    // 1일 공부정보 가져옴 -> 모델 변경 필요
+    // 1일 공부정보 가져옴
     fun getDayInfo(view: View, calendarDay: CalendarDay) {
         val uid = FirebaseAuth.getInstance().uid
         val date = getStringDate(calendarDay, true)
@@ -274,6 +194,74 @@ class FragmentTabCalendar : Fragment() {
 
     } // end of getDate()
 
+    // 주별 확인
+    private fun getWeekInfo(view: View, calendarDay: CalendarDay) {
+        val uid = FirebaseAuth.getInstance().uid
+        val ins = FirebaseDatabase.getInstance()
+
+        // 요일 확인하여 그 주의 일요일에해당하는 날짜 선택 (firstDayOfWeek가 계속 1로 나오네...)
+        val month = getStringDate(calendarDay)
+        var DoW = calendarDay.calendar.get(Calendar.DAY_OF_WEEK)
+        var day = calendarDay.day
+        when(DoW){
+            2 -> day -= 1
+            3 -> day -= 2
+            4 -> day -= 3
+            5 -> day -= 4
+            6 -> day -= 5
+            7 -> day -= 6
+            else -> null
+        }
+
+        for (i in day .. day+6){
+            var date = month
+            if(i<10) date += "0$i"
+            else date += "$i"
+            var ref = ins.getReference("/calendar/$uid/$date/result")
+
+            ref.addListenerForSingleValueEvent(object :ValueEventListener{
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if(snapshot.key.equals("result")){
+                        val data = snapshot.getValue(Result::class.java)
+                        if(data != null){
+                            weekInfo[0] += data.totalStudyTime
+                            weekInfo[1] += data.realStudyTime
+                            weekInfo[2] += data.maxFocusStudyTime
+                            weekInfo[3] += data.totalStudyTime - data.realStudyTime
+                            displayWeek(view)
+                        }
+                    }else{
+                        displayWeek(view)
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(view.context, "주별 계산 실패\n$date", Toast.LENGTH_SHORT).show()
+                }
+
+            })// end of ref
+
+        }
+
+    }// end of getWeekInfo()
+
+    // 1주일의 공부 정보 View에 표시
+    private fun displayWeek(view: View) {
+        if(weekInfo[0] == 0L)
+            view.tv_month.text = "이번주에 공부한 내역이 없습니다."
+        else{
+            val tc = TimeCalculator()
+            weekInfo[3] = weekInfo[0] - weekInfo[1]
+            var str = "총 시간: ${tc.msToStringTime(weekInfo[0])}\n"
+            str += "실제 시간: ${tc.msToStringTime(weekInfo[1])}\n"
+            str += "최대 집중시간: ${tc.msToStringTime(weekInfo[2])}\n"
+            str += "휴식 시간: ${tc.msToStringTime(weekInfo[3])}\n"
+            str += "공부 비율: ${tc.percentage(weekInfo[1], weekInfo[0])}%"
+
+            view.tv_week.text = str
+        }
+    }
+
     // 1달의 공부 정보를 가져와서 표시
     private fun getMonthInfo(view: View, current: CalendarDay) {
         val uid = FirebaseAuth.getInstance().uid
@@ -298,6 +286,8 @@ class FragmentTabCalendar : Fragment() {
                             monthRealTime += data.realStudyTime
                             monthBreakTime += data.totalStudyTime - data.realStudyTime
                             displayMonth(view)
+                        }else{
+                            displayMonth(view)
                         }
                     }
                 }// end of onDataChange
@@ -308,6 +298,23 @@ class FragmentTabCalendar : Fragment() {
             })
         }// end of for
     }// end of getMonthInfo()
+
+    // 1달으 공부 정보 View에 표시
+    private fun displayMonth(view: View) {
+        if(monthTotalTime == 0L)
+            view.tv_month.text = "한달동안 공부한 내역이 없습니다."
+        else{
+            val tc = TimeCalculator()
+            monthBreakTime = monthTotalTime - monthRealTime
+            var str = "총 시간: ${tc.msToStringTime(monthTotalTime)}\n"
+            str += "실제 시간: ${tc.msToStringTime(monthRealTime)}\n"
+            str += "최대 집중시간: ${tc.msToStringTime(monthFocusTime)}\n"
+            str += "휴식 시간: ${tc.msToStringTime(monthBreakTime)}\n"
+            str += "공부 비율: ${tc.percentage(monthRealTime, monthTotalTime)}%"
+
+            view.tv_month.text = str
+        }
+    }
 
     // 각 일자의 목표 달성여부를 판단하여 달력에 표시 -> 미완성
     // 실행되면 1~31일 훑어서 goalstatus 값에 따라 잘 가져오는것 까지 확인하였음 -> 값에따라 캘린더의 해당날짜에 표시
