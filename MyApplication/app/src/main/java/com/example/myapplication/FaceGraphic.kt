@@ -13,7 +13,7 @@ import com.google.android.gms.vision.face.Face
  * graphic overlay view.
  */
 
-internal class FaceGraphic(overlay: GraphicOverlay?) : Graphic(overlay!!) {
+internal class FaceGraphic(overlay: GraphicOverlay?, val face:Face) : Graphic(overlay!!) {
     private val mFacePositionPaint: Paint
     private val mIdPaint: Paint
     private val mBoxPaint: Paint
@@ -24,6 +24,7 @@ internal class FaceGraphic(overlay: GraphicOverlay?) : Graphic(overlay!!) {
     private val mFaceHappiness = 0f
     fun setId(id: Int) {
         mFaceId = id
+
     }
 
     /**
@@ -46,24 +47,7 @@ internal class FaceGraphic(overlay: GraphicOverlay?) : Graphic(overlay!!) {
         val y = translateY(face.position.y + face.height / 2)
         canvas!!.drawCircle(x, y, FACE_POSITION_RADIUS, mFacePositionPaint)
         canvas.drawText("id: $mFaceId", x + ID_X_OFFSET, y + ID_Y_OFFSET, mIdPaint)
-        canvas.drawText(
-            "happiness: " + String.format("%.2f", face.isSmilingProbability),
-            x - ID_X_OFFSET,
-            y - ID_Y_OFFSET,
-            mIdPaint
-        )
-        canvas.drawText(
-            "right eye: " + String.format("%.2f", face.isRightEyeOpenProbability),
-            x + ID_X_OFFSET * 2,
-            y + ID_Y_OFFSET * 2,
-            mIdPaint
-        )
-        canvas.drawText(
-            "left eye: " + String.format("%.2f", face.isLeftEyeOpenProbability),
-            x - ID_X_OFFSET * 2,
-            y - ID_Y_OFFSET * 2,
-            mIdPaint
-        )
+
 
         // Draws a bounding box around the face.
         val xOffset = scaleX(face.width / 2.0f)
@@ -94,8 +78,9 @@ internal class FaceGraphic(overlay: GraphicOverlay?) : Graphic(overlay!!) {
     }
 
     init {
+        mFace = face
         mCurrentColorIndex = (mCurrentColorIndex + 1) % COLOR_CHOICES.size
-        val selectedColor = COLOR_CHOICES[mCurrentColorIndex]
+        val selectedColor = Color.GREEN
         mFacePositionPaint = Paint()
         mFacePositionPaint.color = selectedColor
         mIdPaint = Paint()
