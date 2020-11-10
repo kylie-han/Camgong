@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#6200EE</color>
-    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorPrimary">#8041D9</color>
+    <color name="colorPrimaryDark">#7D5BAE</color>
     <color name="colorAccent">#03DAC5</color>
     <color name="textColor">#8041D9</color>
     <color name="textBlack">#4C4848</color>
@@ -9,4 +9,7 @@
     <color name="cancelBtnBackColor">#E2E2E2</color>
     <color name="calendar">#D1B2FF</color>
     <color name="white">#FFFFFF</color>
+    <color name="study">#D1B2FF</color>
+    <color name="focusStudy">#7D5BAE</color>
+
 </resources>

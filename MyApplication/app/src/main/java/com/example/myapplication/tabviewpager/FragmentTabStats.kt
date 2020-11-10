@@ -11,20 +11,16 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.myapplication.GoalActivity
 import com.example.myapplication.R
-import com.example.myapplication.models.DailyGoal
-import com.example.myapplication.models.FocusStudyTime
-import com.example.myapplication.models.Result
+import com.example.myapplication.models.*
 import com.example.myapplication.util.TimeCalculator
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.layout_stats.*
 import kotlinx.android.synthetic.main.layout_stats.view.*
+import java.lang.ref.Reference
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -34,21 +30,16 @@ class FragmentTabStats : Fragment() {
     // database에 연결
     private lateinit var database: DatabaseReference
     // Log의 TAG
-    companion object {
-        private const val TAG = "FragmentTabStats"
-    }
+    private val TAG = "FragmentTabStats"
     var calendar: Calendar = Calendar.getInstance()
     val year = calendar.get(Calendar.YEAR)
     val month = calendar.get(Calendar.MONTH) +1
     val date = calendar.get(Calendar.DATE)
+    var resultValueEventListener: ValueEventListener? = null
+    var dailyGoalValueEventListener: ValueEventListener? = null
+    var studiesValueEventListener: ValueEventListener? = null
 
-    var myDatePicker =
-        OnDateSetListener { view, year, month, dayOfMonth ->
-            calendar.set(Calendar.YEAR, year)
-            calendar.set(Calendar.MONTH, month)
-            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-            updateLabel()
-        }
+    val studies = Studies()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -60,38 +51,22 @@ class FragmentTabStats : Fragment() {
         if (user == null) {
             Log.d(TAG, "user doesn't exist")
         } else {
-//            var uid = user.uid
-//            val database = Firebase.database
-//            val today = TimeCalculator().today()
-//            val myRef = database.getReference("calendar/$uid/$today")
-//
-//            goalWrite(myRef)
-//            resultWrite(myRef)
-//
-//            // [START read_message]
-//            myRef.child("/result").addValueEventListener(object : ValueEventListener {
-//                override fun onDataChange(dataSnapshot: DataSnapshot) {
-//                    val value = dataSnapshot.getValue<Result>()
-//                    val total = TimeCalculator().msToStringTime(value?.totalStudyTime!!)
-//                    // 총 공부 시간
-//                    view.timeText.text = "$total"
-//                    // 실제 공부한 시간
-//                    view.realTime.text = "${value.realStudyTime}"
-//                    // 공부에 집중한 시간
-//                    val list = value.focusStudyTime
-//                    view.recommendTime.text = "${list.toString()}"
-//                    //최대 공부 시간 : maxFocusStudyTime
-//                }
-//
-//                override fun onCancelled(error: DatabaseError) {
-//                    // Failed to read value
-//                    Log.w(TAG, "Failed to read value.", error.toException())
-//                }
-//            })
-            // [END read_message]
+            var uid = user.uid
+            val database = Firebase.database
+            updateData(database,uid)
             view.calendarText.text = "$year.$month.$date"
 
             val tv_date = view.calendarText
+
+            var myDatePicker =
+                OnDateSetListener { view, year, month, dayOfMonth ->
+                    calendar.set(Calendar.YEAR, year)
+                    calendar.set(Calendar.MONTH, month)
+                    calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                    updateLabel()
+                    updateData(database, uid)
+                }
+
             tv_date.setOnClickListener {
                 context?.let { it1 ->
                     DatePickerDialog(
@@ -104,36 +79,138 @@ class FragmentTabStats : Fragment() {
                 }
             }
         }
-        view.goalButton.setOnClickListener {
+        view.table_layout.setOnLongClickListener {
             startActivity(Intent(this.activity,GoalActivity::class.java))
+            return@setOnLongClickListener true
         }
+
         return view
     }
-//    private fun goalWrite(myRef: DatabaseReference) {
-//        // [START write_message]
-//        // Write a message to the database
-//        val destination = myRef.child("/dailyGoal")
-//        val goalStatus = false
-//        val timeString = TimeCalculator().currentTime()
-//        val goalTime = TimeCalculator().stringToLong(timeString)
-//        val dailyGoal = DailyGoal(goalStatus, goalTime)
-//        destination.setValue(dailyGoal)
-//        // [END write_message]
-//    }
-//    private fun resultWrite(myRef: DatabaseReference){
-//        val destination = myRef.child("/result")
-//        val focusTime = FocusStudyTime("13:00:00","14:00:00")
-//        val focusStudyTime: List<FocusStudyTime> = listOf(focusTime)
-//        val maxFocusStudyTime = "00:30:00"
-//        val realStudyTime = "01:30:00"
-//        val totalStudyTime = 0L
-//        val result = Result(focusStudyTime,maxFocusStudyTime,realStudyTime,totalStudyTime)
-//        destination.setValue(result)
-//    }
+
+    private fun resultWrite(myRef: DatabaseReference){
+        val destination = myRef.child("/result")
+        val focusTime = FocusStudyTime("13:00:00","14:00:00")
+        val focusStudyTime: MutableList<FocusStudyTime> = mutableListOf(focusTime)
+        val maxFocusStudyTime = TimeCalculator().stringToLong("00:30:00")
+        val realStudyTime = TimeCalculator().stringToLong("01:30:00")
+        val totalStudyTime = realStudyTime+10000
+        val result = Result(focusStudyTime,maxFocusStudyTime,realStudyTime,totalStudyTime)
+        destination.setValue(result)
+    }
+
+    private fun studyWrite(myRef: DatabaseReference){
+        val destination = myRef.child("/studies")
+        val realstart = "13:30:00"
+        val realend = "13:50:00"
+        val realStudy = RealStudy(realstart, realend)
+        val startTime = "13:00:00"
+        val endTime = "14:00:00"
+        val study = Study(startTime,endTime, mutableListOf(realStudy))
+        var studies: Studies = Studies(mutableListOf(study))
+        destination.setValue(studies)
+    }
 
     private fun updateLabel() {
         val myFormat = "yyyy.MM.dd"
         val sdf = SimpleDateFormat(myFormat, Locale.KOREA)
         calendarText.text = sdf.format(calendar.time)
     }
+    private fun updateData(database: FirebaseDatabase,uid: String) {
+        val myFormat = "yyyyMMdd"
+        val sdf = SimpleDateFormat(myFormat,Locale.KOREA)
+        val day = sdf.format(calendar.time)
+        Log.e(TAG,"$day")
+        val myRef = database.getReference("calendar/$uid/$day")
+
+        if(resultValueEventListener != null) {
+            myRef.removeEventListener(resultValueEventListener!!)
+            Log.d(TAG,"result 지워짐")
+        }
+        if(dailyGoalValueEventListener != null) {
+            myRef.removeEventListener(dailyGoalValueEventListener!!)
+            Log.d(TAG,"dg 지워짐")
+        }
+        if(studiesValueEventListener != null) {
+            myRef.removeEventListener(studiesValueEventListener!!)
+            Log.d(TAG,"studies 지워짐")
+        }
+            // [START read_message]
+        resultValueEventListener =
+            myRef.child("/result").addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val value = snapshot.getValue<Result>()
+                    if(value == null){
+                        Log.d(TAG,"Result가 없음")
+                        timeText.text = "00:00:00"
+                        realTime.text = "00:00:00"
+                        recommendTime.text = "00:00:00"
+                        maxFocusTime.text = "00:00:00"
+                    }else {
+                        val total = TimeCalculator().msToStringTime(value.totalStudyTime).substring(0,8)
+                        // 총 공부 시간
+                        timeText.text = "$total"
+                        // 실제 공부한 시간
+                        val real = TimeCalculator().msToStringTime(value.realStudyTime).substring(0,8)
+                        realTime.text = "$real"
+                        // 공부에 집중한 시간
+                        var list = value.focusStudyTime.toList()
+                        var string:String = ""
+                        list = list.sortedWith(Comparator { data1, data2 ->
+                            (TimeCalculator().stringToLong(data2.endTime)-TimeCalculator().stringToLong(data2.startTime))
+                                .compareTo((TimeCalculator().stringToLong(data1.endTime))-TimeCalculator().stringToLong(data1.startTime))
+                        })
+
+                        for (i in list.indices){
+                            if(i == 3)break
+                            string += "${list[i].startTime} ~ ${list[i].endTime}\n"
+                        }
+                        recommendTime.text = "${string}"
+                        //최대 공부 시간 : maxFocusStudyTime
+                        val max = TimeCalculator().msToStringTime(value.maxFocusStudyTime).substring(0,8)
+                        maxFocusTime.text = "${max}"
+
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Failed to read value
+                    Log.w(TAG, "Failed to read value.", error.toException())
+                }
+            })
+        dailyGoalValueEventListener =
+            myRef.child("/dailyGoal").addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val value = snapshot.getValue<DailyGoal>()
+                    if (value == null) {
+                        Log.d(TAG, "DailyGoal이 없음")
+                        goalTime.text = "00:00:00"
+                    } else {
+                        val goal = TimeCalculator().msToStringTime(value.goalTime).substring(0,8)
+                        goalTime.text = "$goal"
+                    }
+                }
+                override fun onCancelled(error: DatabaseError) {
+                    // Failed to read value
+                    Log.w(TAG, "Failed to read value.", error.toException())
+                }
+            })
+        studiesValueEventListener =
+            myRef.child("/studies").addValueEventListener(object: ValueEventListener{
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val value = snapshot.getValue<Studies>()
+                    if(value == null){
+                        Log.d(TAG,"Studies가 없음")
+                    }else {
+                        val studies = value.studies
+                        Log.d(TAG,value.studies.toString())
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.w(TAG,"Failed to read value.",error.toException())
+                }
+            })
+        // [END read_message]
+    }
+
 }

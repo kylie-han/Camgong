@@ -7,7 +7,7 @@ data class Studies(
 data class Study(
     var startTime: String = "",
     var endTime: String = "",
-    var realStudy: MutableList<RealStudy>? = mutableListOf()
+    var realStudy: MutableList<RealStudy> = mutableListOf()
 )
 
 data class RealStudy(

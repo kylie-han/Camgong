@@ -4,7 +4,7 @@ import com.google.firebase.database.Exclude
 import com.google.firebase.database.IgnoreExtraProperties
 
 @IgnoreExtraProperties
-data class Result  (
+data class Result (
     var focusStudyTime: MutableList<FocusStudyTime> = mutableListOf(),
     var maxFocusStudyTime: Long = 0L,
     var realStudyTime: Long = 0L,
