@@ -52,6 +52,10 @@ class FragmentTabCalendar : Fragment() {
 
         // 목표치 달성했는지 판단하여 달력에 표시하는메서드
         isAchived(view, CalendarDay.today())
+
+        // 일, 주, 월 공부시간 정보 출력
+        getDayInfo(view, CalendarDay.today())
+        getWeekInfo(view, CalendarDay.today())
         getMonthInfo(view, CalendarDay.today())
 
         // 선택된 날짜가 변경 되었을때
@@ -183,7 +187,7 @@ class FragmentTabCalendar : Fragment() {
                         // 휴식, 공부 비율 그래프로 출력
                         drawPieChart(view, realTime, breakTime)
                     }else{ // 정보가 없을경우 모든 값을 없음으로 처리
-                        view.tv_calendar.text = "정보가 없음"
+                        view.tv_calendar.text = "당일 정보가 없음"
                     }
                 }// end of outer if()
             }
