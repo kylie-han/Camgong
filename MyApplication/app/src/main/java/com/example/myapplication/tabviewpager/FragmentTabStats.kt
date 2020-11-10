@@ -194,22 +194,22 @@ class FragmentTabStats : Fragment() {
                     Log.w(TAG, "Failed to read value.", error.toException())
                 }
             })
-        studiesValueEventListener =
-            myRef.child("/studies").addValueEventListener(object: ValueEventListener{
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val value = snapshot.getValue<Studies>()
-                    if(value == null){
-                        Log.d(TAG,"Studies가 없음")
-                    }else {
-                        val studies = value.studies
-                        Log.d(TAG,value.studies.toString())
-                    }
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Log.w(TAG,"Failed to read value.",error.toException())
-                }
-            })
+//        studiesValueEventListener =
+//            myRef.child("/studies").addValueEventListener(object: ValueEventListener{
+//                override fun onDataChange(snapshot: DataSnapshot) {
+//                    val value = snapshot.getValue<Studies>()
+//                    if(value == null){
+//                        Log.d(TAG,"Studies가 없음")
+//                    }else {
+//                        val studies = value.studies
+//                        Log.d(TAG,value.studies.toString())
+//                    }
+//                }
+//
+//                override fun onCancelled(error: DatabaseError) {
+//                    Log.w(TAG,"Failed to read value.",error.toException())
+//                }
+//            })
         // [END read_message]
     }
 
