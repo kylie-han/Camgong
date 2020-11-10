@@ -2,6 +2,7 @@
 package com.example.myapplication.tabviewpager
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -62,6 +63,8 @@ class FragmentTabCalendar : Fragment() {
 
                 for (i in 0..2)
                     weekInfo[i] = 0L
+
+                Log.e("주별 정보 초기화 확인","${weekInfo[0]}, ${weekInfo[1]}, ${weekInfo[2]}, ${weekInfo[3]}")
                 getWeekInfo(view, date)
             }
         })// end of setOnDateChangedListener
@@ -228,10 +231,12 @@ class FragmentTabCalendar : Fragment() {
                             weekInfo[1] += data.realStudyTime
                             weekInfo[2] += data.maxFocusStudyTime
                             weekInfo[3] += data.totalStudyTime - data.realStudyTime
+                            Log.e("주별 정보 실행값 확인","${weekInfo[0]}, ${weekInfo[1]}, ${weekInfo[2]}, ${weekInfo[3]}")
+                            displayWeek(view)
+                        }else{
+                            Log.e("주별정보 없음 호출", "-----------------------------------------------------")
                             displayWeek(view)
                         }
-                    }else{
-                        displayWeek(view)
                     }
                 }
 
@@ -247,8 +252,9 @@ class FragmentTabCalendar : Fragment() {
 
     // 1주일의 공부 정보 View에 표시
     private fun displayWeek(view: View) {
+        Log.e("display", "${weekInfo[0]}, ${weekInfo[1]}, ${weekInfo[2]}, ${weekInfo[3]}")
         if(weekInfo[0] == 0L)
-            view.tv_month.text = "이번주에 공부한 내역이 없습니다."
+            view.tv_week .text = "이번주에 공부한 내역이 없습니다."
         else{
             val tc = TimeCalculator()
             weekInfo[3] = weekInfo[0] - weekInfo[1]
