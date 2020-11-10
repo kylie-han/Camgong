@@ -8,26 +8,12 @@
     android:orientation="vertical"
     android:weightSum="1">
 
-    <com.applikeysolutions.cosmocalendar.view.CalendarView
+    <com.prolificinteractive.materialcalendarview.MaterialCalendarView
         android:id="@+id/calendar"
         android:layout_width="match_parent"
         android:layout_height="455dp"
-        app:connectedDayIconPosition="top"
-        app:currentDayTextColor="#f79256"
-        app:firstDayOfTheWeek="sunday"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:orientation="horizontal"
-        app:selectedDayBackgroundColor="#FFEACA"
-        app:selectedDayBackgroundEndColor="#f79256"
-        app:selectedDayBackgroundStartColor="#f79256"
-        app:selectedDayTextColor="#FFFFFF"
-        app:selectionType="single"
-        app:weekendDayTextColor="#ef4550">
-        <!--        selectionType: range로 바꾸면 범위 설정 가능-->
-
-    </com.applikeysolutions.cosmocalendar.view.CalendarView>
+        app:mcv_selectionColor="#a9dbf0cb"
+        app:mcv_showOtherDates="defaults" />
 
     <com.github.mikephil.charting.charts.PieChart
         android:id="@+id/piechart"
@@ -57,50 +43,30 @@
         app:tabMode="fixed" />
 
     <TextView
-        android:id="@+id/msg1"
+        android:id="@+id/tv_calendar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/piechart"
-        android:text="총 공부시간"
-        android:textSize="30sp" />
+        android:layout_below="@+id/calendar"
+        android:layout_margin="5dp"
+        android:text="일별 정보"
+        android:textSize="15sp" />
 
     <TextView
-        android:id="@+id/msg2"
+        android:id="@+id/tv_week"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/msg1"
-        android:text="실제 공부시간"
-        android:textSize="30sp" />
+        android:layout_below="@+id/tv_calendar"
+        android:layout_margin="5dp"
+        android:text="주간 정보"
+        android:textSize="15sp" />
 
     <TextView
-        android:id="@+id/msg3"
+        android:id="@+id/tv_month"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/msg2"
-        android:text="최대 집중시간"
-        android:textSize="30sp" />
+        android:layout_below="@+id/tv_week"
+        android:layout_margin="5dp"
+        android:text="월별 정보"
+        android:textSize="15sp"/>
 
-    <TextView
-        android:id="@+id/msg4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/msg3"
-        android:text="휴식 시간"
-        android:textSize="30sp" />
-
-    <TextView
-        android:id="@+id/msg5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/msg4"
-        android:text="공부 비율"
-        android:textSize="30sp" />
-
-    <TextView
-        android:id="@+id/msg6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/msg5"
-        android:text="휴식 비율"
-        android:textSize="30sp" />
 </RelativeLayout>
