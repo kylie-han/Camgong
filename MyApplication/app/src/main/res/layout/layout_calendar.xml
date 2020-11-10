@@ -19,26 +19,13 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <com.applikeysolutions.cosmocalendar.view.CalendarView
+            <com.prolificinteractive.materialcalendarview.MaterialCalendarView
                 android:id="@+id/calendar"
                 android:layout_width="match_parent"
                 android:layout_height="455dp"
-                app:connectedDayIconPosition="top"
-                app:currentDayTextColor="#f79256"
-                app:firstDayOfTheWeek="sunday"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:orientation="horizontal"
-                app:selectedDayBackgroundColor="#FFEACA"
-                app:selectedDayBackgroundEndColor="#f79256"
-                app:selectedDayBackgroundStartColor="#f79256"
-                app:selectedDayTextColor="#FFFFFF"
-                app:selectionType="single"
-                app:weekendDayTextColor="#ef4550">
-                <!--        selectionType: range로 바꾸면 범위 설정 가능-->
+                app:mcv_selectionColor="#a9dbf0cb"
+                app:mcv_showOtherDates="defaults" />
 
-            </com.applikeysolutions.cosmocalendar.view.CalendarView>
 
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/view_pager_in"
