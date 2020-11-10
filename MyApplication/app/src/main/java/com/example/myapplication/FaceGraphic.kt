@@ -47,24 +47,7 @@ internal class FaceGraphic(overlay: GraphicOverlay?, val face:Face) : Graphic(ov
         val y = translateY(face.position.y + face.height / 2)
         canvas!!.drawCircle(x, y, FACE_POSITION_RADIUS, mFacePositionPaint)
         canvas.drawText("id: $mFaceId", x + ID_X_OFFSET, y + ID_Y_OFFSET, mIdPaint)
-        canvas.drawText(
-            "happiness: " + String.format("%.2f", face.isSmilingProbability),
-            x - ID_X_OFFSET,
-            y - ID_Y_OFFSET,
-            mIdPaint
-        )
-        canvas.drawText(
-            "right eye: " + String.format("%.2f", face.isRightEyeOpenProbability),
-            x + ID_X_OFFSET * 2,
-            y + ID_Y_OFFSET * 2,
-            mIdPaint
-        )
-        canvas.drawText(
-            "left eye: " + String.format("%.2f", face.isLeftEyeOpenProbability),
-            x - ID_X_OFFSET * 2,
-            y - ID_Y_OFFSET * 2,
-            mIdPaint
-        )
+
 
         // Draws a bounding box around the face.
         val xOffset = scaleX(face.width / 2.0f)

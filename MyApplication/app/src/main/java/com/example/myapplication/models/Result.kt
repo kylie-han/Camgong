@@ -4,22 +4,12 @@ import com.google.firebase.database.Exclude
 import com.google.firebase.database.IgnoreExtraProperties
 
 @IgnoreExtraProperties
-data class Result (
-    var focusStudyTime: List<FocusStudyTime> = emptyList(),
+data class Result  (
+    var focusStudyTime: MutableList<FocusStudyTime> = mutableListOf(),
     var maxFocusStudyTime: Long = 0L,
     var realStudyTime: Long = 0L,
     var totalStudyTime: Long = 0L
-){
-    @Exclude
-    fun toMap() : Map<String, Any?> {
-        return  mapOf(
-            "focusStudyTime" to focusStudyTime,
-            "maxFocusStudyTime" to maxFocusStudyTime,
-            "realStudyTime" to realStudyTime,
-            "totalStudyTime" to totalStudyTime
-        )
-    }
-}
+)
 data class FocusStudyTime(
     var startTime: String = "",
     var endTime:String = ""
