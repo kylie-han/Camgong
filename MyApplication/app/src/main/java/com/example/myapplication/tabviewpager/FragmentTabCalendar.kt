@@ -417,7 +417,7 @@ class FragmentTabCalendar : Fragment() {
                                 view.calendar.addDecorators(AchiveDecorator(day,2))
                             }
                         }else{ // 목표가 없는 경우, 회색으로 해당날짜에 표시(삭제됨)
-//                            view.tv_calendar.text = "$str" + date+"목표 없음             "
+                            view.calendar.addDecorators(AchiveDecorator(day,3))
                         }
                     }
                 }
