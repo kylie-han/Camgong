@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.example.myapplication.PageAdapterInner
 import com.example.myapplication.R
 import com.example.myapplication.models.DailyGoal
 import com.example.myapplication.models.Result
@@ -17,6 +18,7 @@ import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.PercentFormatter
 import com.github.mikephil.charting.utils.MPPointF
+import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -29,7 +31,7 @@ import kotlin.collections.ArrayList
 
 
 class FragmentTabCalendar : Fragment() {
-    private val tabTextList = arrayListOf("Calendar", "HOME", "STATS")
+    private val tabTextList = arrayListOf("일간", "주간", "월간")
     // 주, 월의 공부시간 정보 저장할 배열, 총시간 / 실제 공부시간 / 최대 집중시간 / 휴식시간
     var monthInfo = mutableListOf<Long>(0,0,0,0)
     var weekInfo = mutableListOf<Long>(0,0,0,0)
@@ -80,7 +82,7 @@ class FragmentTabCalendar : Fragment() {
                 getMonthInfo(view, date) // 해당 월의 공부정보 가져옴
             }
         })// end of setOnMonthChangedListener
-
+        innerInit(view)
         return view
     }
 
@@ -176,6 +178,7 @@ class FragmentTabCalendar : Fragment() {
         pieChart.highlightValues(null)
         pieChart.invalidate()
         pieChart.description.isEnabled = false
+        pieChart.setRotationEnabled(false)
         pieChart.animateXY(1000, 1000);
     }
 
@@ -417,5 +420,12 @@ class FragmentTabCalendar : Fragment() {
             })
         }// end of for
     } // end of isAchived()
+    private fun innerInit(view: View) {
+        view.view_pager_in.adapter = PageAdapterInner(this)
+        TabLayoutMediator(view.tab_in, view.view_pager_in) {
+                tab, position ->
+            tab.text = tabTextList[position]
+        }.attach()
+    }
 
 }
