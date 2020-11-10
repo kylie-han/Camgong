@@ -51,7 +51,7 @@ class FragmentTabCalendar : Fragment() {
         getWeekInfo(view, CalendarDay.today())
         getMonthInfo(view, CalendarDay.today())
 
-        // 선택된 날짜가 변경 되었을때
+        // 선택된 날짜가 변경 리스너
         view.calendar.setOnDateChangedListener(object : OnDateSelectedListener{
             override fun onDateSelected(widget: MaterialCalendarView, date: CalendarDay, selected: Boolean) {
 
@@ -64,7 +64,6 @@ class FragmentTabCalendar : Fragment() {
                 getWeekInfo(view, date)
             }
         })// end of setOnDateChangedListener
-
 
         // 캘린더 월 변경 리스너 -> isAchived() 호출
         view.calendar.setOnMonthChangedListener(object : OnMonthChangedListener{
@@ -115,7 +114,7 @@ class FragmentTabCalendar : Fragment() {
 
         if(flag){
             if(date.day < 10) res += "0${date.day}"
-            else res += "0${date.day}"
+            else res += "${date.day}"
         }
 
         return res
@@ -221,8 +220,10 @@ class FragmentTabCalendar : Fragment() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 // result부분 가져오기
                 if(snapshot.key.equals("result")){
-                    // DB에서 해당 값 가져오기, ResultTime 클래스에 맞게 자동으로 저장됨
+                    // DB에서 해당 값 가져오기, Result 클래스에 맞게 자동으로 저장됨
                     val data = snapshot.getValue(Result::class.java)
+                    Log.e("date", "$date")
+                    Log.e("당일 공부 정보", "${data?.realStudyTime}")
 
                     if(data != null){
                         val tc = TimeCalculator()
