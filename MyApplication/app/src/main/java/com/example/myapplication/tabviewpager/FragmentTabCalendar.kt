@@ -11,9 +11,6 @@ import androidx.fragment.app.Fragment
 import com.example.myapplication.R
 import com.example.myapplication.models.DailyGoal
 import com.example.myapplication.models.Result
-//import com.example.myapplication.util.AchiveDecorator
-//import com.example.myapplication.util.SaturdayDecorator
-//import com.example.myapplication.util.SundayDecorator
 import com.example.myapplication.util.*
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
@@ -62,7 +59,7 @@ class FragmentTabCalendar : Fragment() {
                 getDayInfo(view, date)
 
                 for (i in 0..2)
-                    weekInfo[i] = 0L
+                    weekInfo[i] = 0
 
                 getWeekInfo(view, date)
             }
@@ -74,7 +71,14 @@ class FragmentTabCalendar : Fragment() {
             override fun onMonthChanged(widget: MaterialCalendarView, date: CalendarDay) { // 달이 변경되었을때
                 isAchived(view, date) // 목표 달성여부 달력에 표시
 
-                monthInfo[0] = 0L; monthInfo[1] = 0L; monthInfo[2] = 0L;
+                // 달이 바뀌면 일, 주별 출력정보 + 차트는 초기화 시킴
+                view.tv_calendar.text = "없음"
+                for (i in 0..2){
+                    weekInfo[i] = 0
+                    monthInfo[i] = 0
+                }
+//                drawDayPieChart(view, 0, 0)
+                drawWeekPieChart(view, 0, 0)
                 getMonthInfo(view, date) // 해당 월의 공부정보 가져옴
             }
         })// end of setOnMonthChangedListener
@@ -148,37 +152,7 @@ class FragmentTabCalendar : Fragment() {
 //    }
  
     // 주별 공부비율과 휴식비율을 받아서 차트를 만듦
-//    private fun drawWeekPieChart(view: View, realTime: Long, breakTime: Long) {
-//        val pieChart = view.piechart
-//        val time = ArrayList<PieEntry>()
-//        val listColors = ArrayList<Int>()
-//
-//        // 여기 value에 데이터 값 넣어주세요
-//        time.add(PieEntry(realTime.toFloat(), "공부"))
-//        listColors.add(resources.getColor(R.color.btnBackColor))
-//        time.add(PieEntry(breakTime.toFloat(), "휴식"))
-//        listColors.add(resources.getColor(R.color.cancelBtnBackColor))
-//
-//        val dataSet = PieDataSet(time, "");
-//        dataSet.colors = listColors
-//        dataSet.setDrawIcons(false)
-//        dataSet.sliceSpace = 3f
-//        dataSet.iconsOffset = MPPointF(0F, 40F)
-//        dataSet.selectionShift = 5f
-//        dataSet.valueFormatter = PercentFormatter(pieChart)
-//
-//        val pieData = PieData(dataSet)
-//        pieData.setValueTextSize(17f)
-//        pieChart.data = pieData
-//        pieChart.setUsePercentValues(true)
-//        pieChart.highlightValues(null)
-//        pieChart.invalidate()
-//        pieChart.description.isEnabled = false
-//        pieChart.animateXY(1000, 1000);
-//    }
-
-    // 월별공부비율과 휴식비율을 받아서 차트를 만듦
-    private fun drawMonthPieChart(view: View, realTime: Long, breakTime: Long) {
+    private fun drawWeekPieChart(view: View, realTime: Long, breakTime: Long) {
         val pieChart = view.piechart
         val time = ArrayList<PieEntry>()
         val listColors = ArrayList<Int>()
@@ -206,6 +180,36 @@ class FragmentTabCalendar : Fragment() {
         pieChart.description.isEnabled = false
         pieChart.animateXY(1000, 1000);
     }
+
+    // 월별공부비율과 휴식비율을 받아서 차트를 만듦
+//    private fun drawMonthPieChart(view: View, realTime: Long, breakTime: Long) {
+//        val pieChart = view.piechart
+//        val time = ArrayList<PieEntry>()
+//        val listColors = ArrayList<Int>()
+//
+//        // 여기 value에 데이터 값 넣어주세요
+//        time.add(PieEntry(realTime.toFloat(), "공부"))
+//        listColors.add(resources.getColor(R.color.btnBackColor))
+//        time.add(PieEntry(breakTime.toFloat(), "휴식"))
+//        listColors.add(resources.getColor(R.color.cancelBtnBackColor))
+//
+//        val dataSet = PieDataSet(time, "");
+//        dataSet.colors = listColors
+//        dataSet.setDrawIcons(false)
+//        dataSet.sliceSpace = 3f
+//        dataSet.iconsOffset = MPPointF(0F, 40F)
+//        dataSet.selectionShift = 5f
+//        dataSet.valueFormatter = PercentFormatter(pieChart)
+//
+//        val pieData = PieData(dataSet)
+//        pieData.setValueTextSize(17f)
+//        pieChart.data = pieData
+//        pieChart.setUsePercentValues(true)
+//        pieChart.highlightValues(null)
+//        pieChart.invalidate()
+//        pieChart.description.isEnabled = false
+//        pieChart.animateXY(1000, 1000);
+//    }
 
     // 1일 공부정보 가져옴
     fun getDayInfo(view: View, calendarDay: CalendarDay) {
@@ -309,8 +313,10 @@ class FragmentTabCalendar : Fragment() {
 
     // 1주일의 공부 정보 View에 표시
     private fun displayWeek(view: View) {
-        if(weekInfo[0] == 0L)
-            view.tv_week .text = "이번주에 공부한 내역이 없습니다."
+        if(weekInfo[0] == 0L) {
+            view.tv_week.text = "이번주에 공부한 내역이 없습니다."
+            drawWeekPieChart(view, 0, 100)
+        }
         else{
             val tc = TimeCalculator()
             weekInfo[3] = weekInfo[0] - weekInfo[1]
@@ -321,7 +327,7 @@ class FragmentTabCalendar : Fragment() {
             str += "공부 비율: ${tc.percentage(weekInfo[1], weekInfo[0])}%"
 
             view.tv_week.text = str
-//            drawWeekPieChart(view, weekInfo[1], weekInfo[3])
+            drawWeekPieChart(view, weekInfo[1], weekInfo[3])
         }
     }
 
@@ -364,8 +370,10 @@ class FragmentTabCalendar : Fragment() {
 
     // 1달의 공부 정보 View에 표시
     private fun displayMonth(view: View) {
-        if(monthInfo[0] == 0L)
+        if(monthInfo[0] == 0L) {
             view.tv_month.text = "한달동안 공부한 내역이 없습니다."
+//            drawMonthPieChart(view, 0, 100)
+        }
         else{
             val tc = TimeCalculator()
             monthInfo[3] = monthInfo[0] - monthInfo[1]
@@ -376,7 +384,7 @@ class FragmentTabCalendar : Fragment() {
             str += "공부 비율: ${tc.percentage(monthInfo[1], monthInfo[0])}%"
 
             view.tv_month.text = str
-            drawMonthPieChart(view, monthInfo[1], monthInfo[3])
+//            drawMonthPieChart(view, monthInfo[1], monthInfo[3])
         }
     }
 
