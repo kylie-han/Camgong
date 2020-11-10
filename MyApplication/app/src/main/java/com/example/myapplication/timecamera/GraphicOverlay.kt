@@ -94,8 +94,10 @@ class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
         synchronized(mLock) { mGraphics.add(graphic) }
         postInvalidate()
     }
+    fun size():Int{
+        return mGraphics.size
 
-    /**
+    }    /**
      * Removes a graphic from the overlay.
      */
     fun remove(graphic: Graphic?) {
