@@ -11,12 +11,14 @@ import com.applikeysolutions.cosmocalendar.model.Month
 import com.applikeysolutions.cosmocalendar.selection.OnDaySelectedListener
 import com.applikeysolutions.cosmocalendar.selection.SingleSelectionManager
 import com.applikeysolutions.cosmocalendar.view.CalendarView
+import com.example.myapplication.PageAdapterInner
 import com.example.myapplication.R
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.PercentFormatter
 import com.github.mikephil.charting.utils.MPPointF
+import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -29,7 +31,7 @@ import kotlin.collections.ArrayList
 
 
 class FragmentTabCalendar : Fragment() {
-    private val tabTextList = arrayListOf("Calendar", "HOME", "STATS")
+    private val tabTextList = arrayListOf("일간", "주간", "월간")
 
 
     override fun onCreateView(
@@ -75,6 +77,7 @@ class FragmentTabCalendar : Fragment() {
         pieChart.highlightValues(null)
         pieChart.invalidate()
         pieChart.description.isEnabled = false
+        pieChart.setRotationEnabled(false)
         pieChart.animateXY(1000, 1000);
 
         // 선택된 날짜가 변경 되었을때
@@ -87,6 +90,9 @@ class FragmentTabCalendar : Fragment() {
             // 파이어베이스에서 값 불러와서 textView에 표시
             getDate(view, date)
         })// end of Listener
+
+        innerInit(view)
+
         return view
     }
 
@@ -165,6 +171,16 @@ class FragmentTabCalendar : Fragment() {
         })
 
     } // end of getDate()
+
+
+    private fun innerInit(view: View) {
+        view.view_pager_in.adapter = PageAdapterInner(this)
+        TabLayoutMediator(view.tab_in, view.view_pager_in) {
+                tab, position ->
+            tab.text = tabTextList[position]
+        }.attach()
+    }
+
 }
 
 data class ResultTime(

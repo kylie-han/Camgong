@@ -14,7 +14,7 @@ class FragmentTabMonthly : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.layout_home, container, false)
+        val view = inflater.inflate(R.layout.inner_layout, container, false)
 
         return view
     }
