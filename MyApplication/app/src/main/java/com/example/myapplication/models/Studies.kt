@@ -1,8 +1,5 @@
 package com.example.myapplication.models
 
-data class Studies(
-    var studies: MutableList<Study> = mutableListOf()
-)
 
 data class Study(
     var startTime: String = "",
