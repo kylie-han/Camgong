@@ -6,6 +6,7 @@ import com.example.myapplication.models.FocusStudyTime
 import java.time.*
 import java.time.format.DateTimeFormatter
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 @RequiresApi(Build.VERSION_CODES.O)
 class TimeCalculator {
@@ -82,6 +83,15 @@ class TimeCalculator {
         val sec = localtime.second*1000
         val milli = localtime.nano/1000000
         return hours+min+sec+milli
+    }
+
+    // time1 / time2 * 100의 결과를 소수점 2번째 반올림한 결과 반환
+    fun percentage(time1:Long, time2:Long): Double{
+        var percent = time1.toDouble() / time2 * 100
+
+        var res = (percent*100).roundToInt() / 100.0
+
+        return res
     }
 }
 

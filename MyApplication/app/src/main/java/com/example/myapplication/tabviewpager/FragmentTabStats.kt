@@ -126,6 +126,7 @@ class FragmentTabStats : Fragment() {
         if(dailyGoalValueEventListener != null) myRef.removeEventListener(dailyGoalValueEventListener!!)
         if(studiesValueEventListener != null) myRef.removeEventListener(studiesValueEventListener!!)
         // [START read_message]
+
         resultValueEventListener =
             myRef.child("/result").addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
