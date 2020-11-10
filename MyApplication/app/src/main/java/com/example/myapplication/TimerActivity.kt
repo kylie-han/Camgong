@@ -36,11 +36,13 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ml.vision.objects.FirebaseVisionObjectDetectorOptions
 import kotlinx.android.synthetic.main.activity_timer.*
 import kotlinx.android.synthetic.main.layout_home.view.*
 import java.io.IOException
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class TimerActivity : AppCompatActivity() {
@@ -62,7 +64,7 @@ class TimerActivity : AppCompatActivity() {
     private var calendar: Calendar = Calendar.getInstance()
     private var study1 :Study = Study()
     private var realStudy1 :RealStudy = RealStudy()
-    private var studies1 : Studies = Studies()
+    private var studies1 : ArrayList<Study> = arrayListOf()
     private var starthour : Int = 0
     private var startminute : Int = 0
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -127,14 +129,15 @@ class TimerActivity : AppCompatActivity() {
 
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.key.equals("studies")) {
-                    for(p0 in snapshot.children)
-                    {
-                        val p1 = p0.getValue(Study::class.java)
-                        if(p1 != null)
-                        {
-                            studies1.studies.add(p1)
-                        }
-                    }
+                    studies1 = snapshot.getValue<ArrayList<Study>>()!!
+//                    for(p0 in snapshot.children)
+//                    {
+//                        val p1 = p0.getValue(Study::class.java)
+//                        if(p1 != null)
+//                        {
+//                            studies1.studies.add(p1)
+//                        }
+//                    }
                 }
 
             }
@@ -231,10 +234,10 @@ class TimerActivity : AppCompatActivity() {
             }
         }
 
-        studies1.studies.add(study1)
+        studies1.add(study1)
         Log.d("올림",""+studies1)
         ref =FirebaseDatabase.getInstance().getReference("/calendar/$uid/$date/studies")
-        ref.setValue(studies1.studies)
+        ref.setValue(studies1)
 
     }
     private fun requestCameraPermission() {
