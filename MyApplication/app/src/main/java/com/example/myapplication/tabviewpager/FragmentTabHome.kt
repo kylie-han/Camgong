@@ -1,7 +1,5 @@
 package com.example.myapplication.tabviewpager
 
-import android.app.AlertDialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
@@ -24,9 +22,6 @@ import kotlinx.android.synthetic.main.layout_home.view.*
 import java.util.Calendar
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import kotlinx.android.synthetic.main.activity_timer.*
-import java.util.ArrayList
-
 
 class FragmentTabHome  : Fragment() {
     private var timer : Result = Result()

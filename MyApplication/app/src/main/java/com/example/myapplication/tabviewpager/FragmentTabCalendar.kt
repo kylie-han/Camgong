@@ -8,6 +8,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.applikeysolutions.cosmocalendar.listeners.OnMonthChangeListener
+import com.applikeysolutions.cosmocalendar.model.Month
+import com.applikeysolutions.cosmocalendar.selection.OnDaySelectedListener
+import com.applikeysolutions.cosmocalendar.selection.SingleSelectionManager
+import com.applikeysolutions.cosmocalendar.view.CalendarView
+import com.example.myapplication.PageAdapterInner
 import com.example.myapplication.R
 import com.example.myapplication.models.DailyGoal
 import com.example.myapplication.models.Result
@@ -17,6 +23,7 @@ import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.PercentFormatter
 import com.github.mikephil.charting.utils.MPPointF
+import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -29,10 +36,8 @@ import kotlin.collections.ArrayList
 
 
 class FragmentTabCalendar : Fragment() {
-    private val tabTextList = arrayListOf("Calendar", "HOME", "STATS")
-    // 주, 월의 공부시간 정보 저장할 배열, 총시간 / 실제 공부시간 / 최대 집중시간 / 휴식시간
-    var monthInfo = mutableListOf<Long>(0,0,0,0)
-    var weekInfo = mutableListOf<Long>(0,0,0,0)
+    private val tabTextList = arrayListOf("일간", "주간", "월간")
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -177,7 +182,23 @@ class FragmentTabCalendar : Fragment() {
         pieChart.highlightValues(null)
         pieChart.invalidate()
         pieChart.description.isEnabled = false
+        pieChart.setRotationEnabled(false)
         pieChart.animateXY(1000, 1000);
+
+        // 선택된 날짜가 변경 되었을때
+        view.calendar.selectionManager = SingleSelectionManager(OnDaySelectedListener {
+            if (view.calendar.selectedDates.size <= 0)
+                return@OnDaySelectedListener
+            // 선택된 일자
+            var date = selectedDay(calendarView)
+
+            // 파이어베이스에서 값 불러와서 textView에 표시
+            getDate(view, date)
+        })// end of Listener
+
+        innerInit(view)
+
+        return view
     }
 
     // 월별공부비율과 휴식비율을 받아서 차트를 만듦
@@ -261,173 +282,19 @@ class FragmentTabCalendar : Fragment() {
 
     } // end of getDate()
 
-    // 주별 확인
-    private fun getWeekInfo(view: View, calendarDay: CalendarDay) {
-        val uid = FirebaseAuth.getInstance().uid
-        val ins = FirebaseDatabase.getInstance()
 
-        // 요일 확인하여 그 주의 일요일에해당하는 날짜 선택 (firstDayOfWeek가 계속 1로 나오네...)
-        val month = getStringDate(calendarDay)
-        var DoW = calendarDay.calendar.get(Calendar.DAY_OF_WEEK)
-        var day = calendarDay.day
-        when(DoW){
-            2 -> day -= 1
-            3 -> day -= 2
-            4 -> day -= 3
-            5 -> day -= 4
-            6 -> day -= 5
-            7 -> day -= 6
-            else -> null
-        }
-
-        for (i in day .. day+6){
-            var date = month
-            if(i<10) date += "0$i"
-            else date += "$i"
-            var ref = ins.getReference("/calendar/$uid/$date/result")
-
-            ref.addListenerForSingleValueEvent(object :ValueEventListener{
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if(snapshot.key.equals("result")){
-                        val data = snapshot.getValue(Result::class.java)
-                        if(data != null){
-                            weekInfo[0] += data.totalStudyTime
-                            weekInfo[1] += data.realStudyTime
-                            weekInfo[2] += data.maxFocusStudyTime
-                            weekInfo[3] += data.totalStudyTime - data.realStudyTime
-                            displayWeek(view)
-                        }else{
-                            displayWeek(view)
-                        }
-                    }
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Toast.makeText(view.context, "주별 계산 실패\n$date", Toast.LENGTH_SHORT).show()
-                }
-
-            })// end of ref
-
-        }
-
-    }// end of getWeekInfo()
-
-    // 1주일의 공부 정보 View에 표시
-    private fun displayWeek(view: View) {
-        if(weekInfo[0] == 0L) {
-            view.tv_week.text = "이번주에 공부한 내역이 없습니다."
-            drawWeekPieChart(view, 0, 100)
-        }
-        else{
-            val tc = TimeCalculator()
-            weekInfo[3] = weekInfo[0] - weekInfo[1]
-            var str = "총 시간: ${tc.msToStringTime(weekInfo[0])}\n"
-            str += "실제 시간: ${tc.msToStringTime(weekInfo[1])}\n"
-            str += "최대 집중시간: ${tc.msToStringTime(weekInfo[2])}\n"
-            str += "휴식 시간: ${tc.msToStringTime(weekInfo[3])}\n"
-            str += "공부 비율: ${tc.percentage(weekInfo[1], weekInfo[0])}%"
-
-            view.tv_week.text = str
-            drawWeekPieChart(view, weekInfo[1], weekInfo[3])
-        }
+    private fun innerInit(view: View) {
+        view.view_pager_in.adapter = PageAdapterInner(this)
+        TabLayoutMediator(view.tab_in, view.view_pager_in) {
+                tab, position ->
+            tab.text = tabTextList[position]
+        }.attach()
     }
-
-    // 1달의 공부 정보를 가져와서 표시
-    private fun getMonthInfo(view: View, current: CalendarDay) {
-        val uid = FirebaseAuth.getInstance().uid
-        val ins = FirebaseDatabase.getInstance()
-        val month = getStringDate(current)
-
-        val tc = TimeCalculator()
-        for (i in 1..31){
-            var date = month
-            if(i<10) date += "0$i"
-            else date += "$i"
-            var ref = ins.getReference("/calendar/$uid/$date/result")
-
-            ref.addListenerForSingleValueEvent(object :ValueEventListener{
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if(snapshot.key.equals("result")){
-                        val data = snapshot.getValue(Result::class.java)
-
-                        if(data != null){
-                            monthInfo[0] += data.totalStudyTime
-                            monthInfo[2] += data.maxFocusStudyTime
-                            monthInfo[1] += data.realStudyTime
-                            monthInfo[3] += data.totalStudyTime - data.realStudyTime
-                            displayMonth(view)
-                        }else{
-                            displayMonth(view)
-                        }
-                    }
-                }// end of onDataChange
-
-                override fun onCancelled(error: DatabaseError) {
-                    Toast.makeText(view.context, "월별 계산 실패\n$date", Toast.LENGTH_SHORT).show()
-                }
-            })
-        }// end of for
-    }// end of getMonthInfo()
-
-    // 1달의 공부 정보 View에 표시
-    private fun displayMonth(view: View) {
-        if(monthInfo[0] == 0L) {
-            view.tv_month.text = "한달동안 공부한 내역이 없습니다."
-//            drawMonthPieChart(view, 0, 100)
-        }
-        else{
-            val tc = TimeCalculator()
-            monthInfo[3] = monthInfo[0] - monthInfo[1]
-            var str = "총 시간: ${tc.msToStringTime(monthInfo[0])}\n"
-            str += "실제 시간: ${tc.msToStringTime(monthInfo[1])}\n"
-            str += "최대 집중시간: ${tc.msToStringTime(monthInfo[2])}\n"
-            str += "휴식 시간: ${tc.msToStringTime(monthInfo[3])}\n"
-            str += "공부 비율: ${tc.percentage(monthInfo[1], monthInfo[0])}%"
-
-            view.tv_month.text = str
-//            drawMonthPieChart(view, monthInfo[1], monthInfo[3])
-        }
-    }
-
-    // 각 일자의 목표 달성여부를 판단하여 달력에 표시 -> 미완성
-    // 실행되면 1~31일 훑어서 goalstatus 값에 따라 잘 가져오는것 까지 확인하였음 -> 값에따라 캘린더의 해당날짜에 표시
-    private fun isAchived(view: View, current: CalendarDay) {
-        val uid = FirebaseAuth.getInstance().uid
-        val ins = FirebaseDatabase.getInstance()
-        val month = getStringDate(current)
-        for (i in 1..31){
-            var date = month  // YYYYMMDD
-            if(i<10) date += "0$i"
-            else date += "$i"
-
-            var ref = ins.getReference("/calendar/$uid/$date/dailyGoal")
-            val day = CalendarDay.from(current.year, current.month, i) // 현재 조회중인 날짜
-
-            ref.addListenerForSingleValueEvent(object : ValueEventListener{
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if(snapshot.key.equals("dailyGoal")){
-                        val data = snapshot.getValue(DailyGoal::class.java)
-                        var str = "기본값"
-                        if(data != null){ // 목표가 설정되어있을경우
-                            if(data.goalStatus){ // 달성한 경우
-                                // 파란색으로 해당날짜에 표시
-                                view.calendar.addDecorators(AchiveDecorator(day,1))
-                            }else{ // 달성 못한 경우
-                                // 빨간색으로 해당날짜에 표시
-                                view.calendar.addDecorators(AchiveDecorator(day,2))
-                            }
-                        }else{ // 목표가 없는 경우, 회색으로 해당날짜에 표시(삭제됨)
-                            view.calendar.addDecorators(AchiveDecorator(day,3))
-                        }
-                    }
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Toast.makeText(view.context, "불러오기 실패\n$date", Toast.LENGTH_SHORT).show()
-                }
-
-            })
-        }// end of for
-    } // end of isAchived()
 
 }
+
+data class ResultTime(
+    var totalstudytime: String = "",
+    var realstudytime: String = "",
+    var maxfocusstudytime: String = ""
+)
