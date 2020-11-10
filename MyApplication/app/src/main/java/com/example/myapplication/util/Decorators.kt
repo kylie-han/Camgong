@@ -47,7 +47,6 @@ public class AchiveDecorator(val date:CalendarDay, val type:Int) : DayViewDecora
         when(type){
             1 -> color = Color.BLUE
             2 -> color = Color.RED
-            3 -> color = Color.GRAY
         }
         view.addSpan(DotSpan(5F, color))
     }
