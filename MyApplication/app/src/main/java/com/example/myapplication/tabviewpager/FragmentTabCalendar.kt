@@ -2,7 +2,6 @@
 package com.example.myapplication.tabviewpager
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -53,7 +52,8 @@ class FragmentTabCalendar : Fragment() {
         getWeekInfo(view, CalendarDay.today())
         getMonthInfo(view, CalendarDay.today())
 
-        // 선택된 날짜가 변경 리스너
+
+        // 선택 날짜 변경 리스너
         view.calendar.setOnDateChangedListener(object : OnDateSelectedListener{
             override fun onDateSelected(widget: MaterialCalendarView, date: CalendarDay, selected: Boolean) {
 
@@ -67,7 +67,7 @@ class FragmentTabCalendar : Fragment() {
             }
         })// end of setOnDateChangedListener
 
-        // 캘린더 월 변경 리스너 -> isAchived() 호출
+        // 캘린더 월 변경 리스너
         view.calendar.setOnMonthChangedListener(object : OnMonthChangedListener{
             override fun onMonthChanged(widget: MaterialCalendarView, date: CalendarDay) { // 달이 변경되었을때
                 isAchived(view, date) // 목표 달성여부 달력에 표시
@@ -77,8 +77,10 @@ class FragmentTabCalendar : Fragment() {
                     weekInfo[i] = 0
                     monthInfo[i] = 0
                 }
-//                drawDayPieChart(view, 0, 0)
-                drawWeekPieChart(view, 0, 0)
+                // 일간, 주간 차트 초기화
+//              drawDayPieChart(view, 0, 0)
+              drawWeekPieChart(view, 0, 0)
+
                 getMonthInfo(view, date) // 해당 월의 공부정보 가져옴
             }
         })// end of setOnMonthChangedListener
@@ -224,8 +226,6 @@ class FragmentTabCalendar : Fragment() {
                 if(snapshot.key.equals("result")){
                     // DB에서 해당 값 가져오기, Result 클래스에 맞게 자동으로 저장됨
                     val data = snapshot.getValue(Result::class.java)
-                    Log.e("date", "$date")
-                    Log.e("당일 공부 정보", "${data?.realStudyTime}")
 
                     if(data != null){
                         val tc = TimeCalculator()
@@ -276,14 +276,13 @@ class FragmentTabCalendar : Fragment() {
             7 -> day -= 6
             else -> null
         }
-
         for (i in day .. day+6){
             var date = month
             if(i<10) date += "0$i"
             else date += "$i"
             var ref = ins.getReference("/calendar/$uid/$date/result")
 
-            ref.addListenerForSingleValueEvent(object :ValueEventListener{
+            ref.addValueEventListener(object : ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if(snapshot.key.equals("result")){
                         val data = snapshot.getValue(Result::class.java)
@@ -292,11 +291,13 @@ class FragmentTabCalendar : Fragment() {
                             weekInfo[1] += data.realStudyTime
                             weekInfo[2] += data.maxFocusStudyTime
                             weekInfo[3] += data.totalStudyTime - data.realStudyTime
-                            displayWeek(view)
+//                            displayWeek(view)
                         }else{
-                            displayWeek(view)
+//                            displayWeek(view)
                         }
                     }
+                    if(i == day+6)
+                        displayWeek(view)
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -305,7 +306,7 @@ class FragmentTabCalendar : Fragment() {
 
             })// end of ref
 
-        }
+        }// end of for
 
     }// end of getWeekInfo()
 
@@ -339,7 +340,7 @@ class FragmentTabCalendar : Fragment() {
             else date += "$i"
             var ref = ins.getReference("/calendar/$uid/$date/result")
 
-            ref.addListenerForSingleValueEvent(object :ValueEventListener{
+            ref.addValueEventListener(object : ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if(snapshot.key.equals("result")){
                         val data = snapshot.getValue(Result::class.java)
@@ -349,10 +350,13 @@ class FragmentTabCalendar : Fragment() {
                             monthInfo[2] += data.maxFocusStudyTime
                             monthInfo[1] += data.realStudyTime
                             monthInfo[3] += data.totalStudyTime - data.realStudyTime
-                            displayMonth(view)
+//                            displayMonth(view)
                         }else{
-                            displayMonth(view)
+//                            displayMonth(view)
                         }
+                    }
+                    if(i==31){
+                        displayMonth(view)
                     }
                 }// end of onDataChange
 
@@ -407,7 +411,7 @@ class FragmentTabCalendar : Fragment() {
                                 // 빨간색으로 해당날짜에 표시
                                 view.calendar.addDecorators(AchiveDecorator(day,2))
                             }
-                        }else{ // 목표가 없는 경우, 회색으로 해당날짜에 표시(삭제됨)
+                        }else{ // 목표가 없는 경우, 회색으로 해당날짜에 표시
                             view.calendar.addDecorators(AchiveDecorator(day,3))
                         }
                     }
