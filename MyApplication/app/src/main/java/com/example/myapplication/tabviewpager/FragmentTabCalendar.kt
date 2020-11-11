@@ -2,7 +2,6 @@
 package com.example.myapplication.tabviewpager
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,9 +23,6 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.prolificinteractive.materialcalendarview.*
 import kotlinx.android.synthetic.main.layout_calendar.view.*
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -83,16 +79,11 @@ class FragmentTabCalendar : Fragment() {
                 }
                 // 일간, 주간 차트 초기화
 //              drawDayPieChart(view, 0, 0)
-//              drawWeekPieChart(view, 0, 0)
+              drawWeekPieChart(view, 0, 0)
 
                 getMonthInfo(view, date) // 해당 월의 공부정보 가져옴
             }
         })// end of setOnMonthChangedListener
-
-        view.btn1.setOnClickListener {
-            displayWeek(view)
-            displayMonth(view)
-        }
 
         return view
     }
@@ -296,7 +287,6 @@ class FragmentTabCalendar : Fragment() {
             ref.addValueEventListener(object : ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if(snapshot.key.equals("result")){
-                        Log.e("주별 값 변경", "$weekInfo")
                         val data = snapshot.getValue(Result::class.java)
                         if(data != null){
                             weekInfo[0] += data.totalStudyTime
@@ -324,7 +314,6 @@ class FragmentTabCalendar : Fragment() {
 
     // 1주일의 공부 정보 View에 표시
     private fun displayWeek(view: View) {
-        Log.e("출력되는 정보", "$weekInfo")
         if(weekInfo[0] == 0L) {
             view.tv_week.text = "이번주에 공부한 내역이 없습니다."
             drawWeekPieChart(view, 0, 100)
@@ -358,7 +347,6 @@ class FragmentTabCalendar : Fragment() {
             ref.addValueEventListener(object : ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if(snapshot.key.equals("result")){
-                        Log.e("월별 값 변경", "$monthInfo")
                         val data = snapshot.getValue(Result::class.java)
 
                         if(data != null){
@@ -429,7 +417,7 @@ class FragmentTabCalendar : Fragment() {
                                 // 빨간색으로 해당날짜에 표시
                                 view.calendar.addDecorators(AchiveDecorator(day,2))
                             }
-                        }else{ // 목표가 없는 경우, 회색으로 해당날짜에 표시(삭제됨)
+                        }else{ // 목표가 없는 경우, 회색으로 해당날짜에 표시
                             view.calendar.addDecorators(AchiveDecorator(day,3))
                         }
                     }
