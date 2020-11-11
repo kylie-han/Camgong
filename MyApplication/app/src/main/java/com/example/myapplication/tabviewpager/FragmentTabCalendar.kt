@@ -24,6 +24,9 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.prolificinteractive.materialcalendarview.*
 import kotlinx.android.synthetic.main.layout_calendar.view.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -51,7 +54,8 @@ class FragmentTabCalendar : Fragment() {
         getWeekInfo(view, CalendarDay.today())
         getMonthInfo(view, CalendarDay.today())
 
-        // 선택된 날짜가 변경 리스너
+
+        // 선택 날짜 변경 리스너
         view.calendar.setOnDateChangedListener(object : OnDateSelectedListener{
             override fun onDateSelected(widget: MaterialCalendarView, date: CalendarDay, selected: Boolean) {
 
@@ -65,22 +69,30 @@ class FragmentTabCalendar : Fragment() {
             }
         })// end of setOnDateChangedListener
 
-        // 캘린더 월 변경 리스너 -> isAchived() 호출
+        // 캘린더 월 변경 리스너
         view.calendar.setOnMonthChangedListener(object : OnMonthChangedListener{
             override fun onMonthChanged(widget: MaterialCalendarView, date: CalendarDay) { // 달이 변경되었을때
                 isAchived(view, date) // 목표 달성여부 달력에 표시
 
                 // 달이 바뀌면 일, 주별 출력정보 + 차트는 초기화 시킴
-                view.tv_calendar.text = "없음"
+                view.tv_day.text = "일간 정보 없음"
+                view.tv_week.text = "주간 정보 없음"
                 for (i in 0..2){
                     weekInfo[i] = 0
                     monthInfo[i] = 0
                 }
-//                drawDayPieChart(view, 0, 0)
-                drawWeekPieChart(view, 0, 0)
+                // 일간, 주간 차트 초기화
+//              drawDayPieChart(view, 0, 0)
+//              drawWeekPieChart(view, 0, 0)
+
                 getMonthInfo(view, date) // 해당 월의 공부정보 가져옴
             }
         })// end of setOnMonthChangedListener
+
+        view.btn1.setOnClickListener {
+            displayWeek(view)
+            displayMonth(view)
+        }
 
         return view
     }
@@ -222,8 +234,6 @@ class FragmentTabCalendar : Fragment() {
                 if(snapshot.key.equals("result")){
                     // DB에서 해당 값 가져오기, Result 클래스에 맞게 자동으로 저장됨
                     val data = snapshot.getValue(Result::class.java)
-                    Log.e("date", "$date")
-                    Log.e("당일 공부 정보", "${data?.realStudyTime}")
 
                     if(data != null){
                         val tc = TimeCalculator()
@@ -239,21 +249,19 @@ class FragmentTabCalendar : Fragment() {
                         str += "실제 공부시간: ${tc.msToStringTime(realTime)}\n"
                         str += "최대 집중 시간: ${tc.msToStringTime(focusTime)}\n"
                         str += "휴식시간: ${tc.msToStringTime(breakTime)}\n"
-                        str += "공부시간 비율: ${tc.percentage(realTime,totalTime)}%\n"
-                        str += "휴식시간 비율: ${tc.percentage(breakTime,totalTime)}%\n"
 
-                        view.tv_calendar.text = str
+                        view.tv_day.text = str
 
                         // 휴식, 공부 비율 그래프로 출력
 //                        drawDayPieChart(view, realTime, breakTime)
                     }else{ // 정보가 없을경우 모든 값을 없음으로 처리
-                        view.tv_calendar.text = "당일 정보가 없음"
+                        view.tv_day.text = "당일 정보가 없음"
                     }
                 }// end of outer if()
             }
 
             override fun onCancelled(error: DatabaseError) {
-                view.tv_calendar.text = "Failed"
+                view.tv_day.text = "Failed"
                 println("Failed to read Value")
             }
 
@@ -279,27 +287,29 @@ class FragmentTabCalendar : Fragment() {
             7 -> day -= 6
             else -> null
         }
-
         for (i in day .. day+6){
             var date = month
             if(i<10) date += "0$i"
             else date += "$i"
             var ref = ins.getReference("/calendar/$uid/$date/result")
 
-            ref.addListenerForSingleValueEvent(object :ValueEventListener{
+            ref.addValueEventListener(object : ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if(snapshot.key.equals("result")){
+                        Log.e("주별 값 변경", "$weekInfo")
                         val data = snapshot.getValue(Result::class.java)
                         if(data != null){
                             weekInfo[0] += data.totalStudyTime
                             weekInfo[1] += data.realStudyTime
                             weekInfo[2] += data.maxFocusStudyTime
                             weekInfo[3] += data.totalStudyTime - data.realStudyTime
-                            displayWeek(view)
+//                            displayWeek(view)
                         }else{
-                            displayWeek(view)
+//                            displayWeek(view)
                         }
                     }
+                    if(i == day+6)
+                        displayWeek(view)
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -308,12 +318,13 @@ class FragmentTabCalendar : Fragment() {
 
             })// end of ref
 
-        }
+        }// end of for
 
     }// end of getWeekInfo()
 
     // 1주일의 공부 정보 View에 표시
     private fun displayWeek(view: View) {
+        Log.e("출력되는 정보", "$weekInfo")
         if(weekInfo[0] == 0L) {
             view.tv_week.text = "이번주에 공부한 내역이 없습니다."
             drawWeekPieChart(view, 0, 100)
@@ -325,7 +336,6 @@ class FragmentTabCalendar : Fragment() {
             str += "실제 시간: ${tc.msToStringTime(weekInfo[1])}\n"
             str += "최대 집중시간: ${tc.msToStringTime(weekInfo[2])}\n"
             str += "휴식 시간: ${tc.msToStringTime(weekInfo[3])}\n"
-            str += "공부 비율: ${tc.percentage(weekInfo[1], weekInfo[0])}%"
 
             view.tv_week.text = str
             drawWeekPieChart(view, weekInfo[1], weekInfo[3])
@@ -345,9 +355,10 @@ class FragmentTabCalendar : Fragment() {
             else date += "$i"
             var ref = ins.getReference("/calendar/$uid/$date/result")
 
-            ref.addListenerForSingleValueEvent(object :ValueEventListener{
+            ref.addValueEventListener(object : ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if(snapshot.key.equals("result")){
+                        Log.e("월별 값 변경", "$monthInfo")
                         val data = snapshot.getValue(Result::class.java)
 
                         if(data != null){
@@ -355,10 +366,13 @@ class FragmentTabCalendar : Fragment() {
                             monthInfo[2] += data.maxFocusStudyTime
                             monthInfo[1] += data.realStudyTime
                             monthInfo[3] += data.totalStudyTime - data.realStudyTime
-                            displayMonth(view)
+//                            displayMonth(view)
                         }else{
-                            displayMonth(view)
+//                            displayMonth(view)
                         }
+                    }
+                    if(i==31){
+                        displayMonth(view)
                     }
                 }// end of onDataChange
 
@@ -382,7 +396,6 @@ class FragmentTabCalendar : Fragment() {
             str += "실제 시간: ${tc.msToStringTime(monthInfo[1])}\n"
             str += "최대 집중시간: ${tc.msToStringTime(monthInfo[2])}\n"
             str += "휴식 시간: ${tc.msToStringTime(monthInfo[3])}\n"
-            str += "공부 비율: ${tc.percentage(monthInfo[1], monthInfo[0])}%"
 
             view.tv_month.text = str
 //            drawMonthPieChart(view, monthInfo[1], monthInfo[3])

@@ -43,7 +43,7 @@
         app:tabMode="fixed" />
 
     <TextView
-        android:id="@+id/tv_calendar"
+        android:id="@+id/tv_day"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/calendar"
@@ -55,7 +55,7 @@
         android:id="@+id/tv_week"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/tv_calendar"
+        android:layout_below="@+id/tv_day"
         android:layout_margin="5dp"
         android:text="주간 정보"
         android:textSize="15sp" />
@@ -68,5 +68,12 @@
         android:layout_margin="5dp"
         android:text="월별 정보"
         android:textSize="15sp"/>
+
+    <Button
+        android:id="@+id/btn1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_month"
+        android:text="btn1" />
 
 </RelativeLayout>
