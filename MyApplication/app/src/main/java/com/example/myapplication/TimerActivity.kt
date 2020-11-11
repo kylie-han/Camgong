@@ -14,13 +14,16 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
+import android.widget.Chronometer
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.example.myapplication.models.*
 import com.example.myapplication.timecamera.CameraSourcePreview
 import com.example.myapplication.timecamera.GraphicOverlay
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.vision.CameraSource
+import com.google.android.gms.vision.Detector
 import com.google.android.gms.vision.Detector.Detections
 import com.google.android.gms.vision.MultiProcessor
 import com.google.android.gms.vision.Tracker
@@ -29,10 +32,17 @@ import com.google.android.gms.vision.face.FaceDetector
 import com.google.android.gms.vision.face.FaceDetector.Builder
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.getValue
+import com.google.firebase.ml.vision.objects.FirebaseVisionObjectDetectorOptions
 import kotlinx.android.synthetic.main.activity_timer.*
+import kotlinx.android.synthetic.main.layout_home.view.*
 import java.io.IOException
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class TimerActivity : AppCompatActivity() {
@@ -44,19 +54,19 @@ class TimerActivity : AppCompatActivity() {
     private var mGraphicOverlay: GraphicOverlay? = null
 
     private val RC_HANDLE_GMS = 9001
-
     // permission request codes need to be < 256
     private val RC_HANDLE_CAMERA_PERM = 2
-
-    private class GraphicFaceTrackerFactory(mGraphicOverlay:GraphicOverlay) : MultiProcessor.Factory<Face> {
-        var Overlay : GraphicOverlay? = null;
-        init {
-            Overlay = mGraphicOverlay
-        }
-        override fun create(face: Face): Tracker<Face> {
-            return GraphicFaceTracker(Overlay!!)
-        }
-    }
+    private var noStudyTime: Long = 0
+    private var lasttime: Long = 0
+    private var flag: Boolean = true
+    private var noFlag: Boolean = true
+    private var timer : Result = Result()
+    private var calendar: Calendar = Calendar.getInstance()
+    private var study1 :Study = Study()
+    private var realStudy1 :RealStudy = RealStudy()
+    private var studies1 : ArrayList<Study> = arrayListOf()
+    private var starthour : Int = 0
+    private var startminute : Int = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // 상태바 숨기기
@@ -71,10 +81,78 @@ class TimerActivity : AppCompatActivity() {
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
         )
         setContentView(R.layout.activity_timer)
+        calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH) +1
+        val day = calendar.get(Calendar.DATE)
+        var date = "$year"
+        if(month<10)
+        {
+            date+="0$month"
+        }else
+        {
+            date+="$month"
+        }
+        if(day<10)
+        {
+            date+="0$day"
+        }else
+        {
+            date+="$day"
+        }
+        // result 내용들 가지고 오기
         var intent = getIntent()
-        var time: Long= intent.getLongExtra("time", 0)
-        chronometer.base=SystemClock.elapsedRealtime()+time;
-        chronometer.start();
+        val uid = FirebaseAuth.getInstance().uid
+        val ref =FirebaseDatabase.getInstance().getReference("/calendar/$uid/$date/result")
+        ref.addValueEventListener(object : ValueEventListener {
+            override fun onCancelled(error: DatabaseError) {
+            }
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.key.equals("result")) {
+                    val result = snapshot.getValue(Result::class.java)
+                    if(result!=null)
+                    {
+                        timer = Result(result.focusStudyTime,result.maxFocusStudyTime,result.realStudyTime,result.totalStudyTime)
+                        chronometer.base=SystemClock.elapsedRealtime()+timer.realStudyTime
+                        totalStudy?.base = SystemClock.elapsedRealtime()+timer.totalStudyTime
+                    }
+                }
+
+            }
+        })
+        //Studies 내용들 가지고 오기
+        val ref2 =FirebaseDatabase.getInstance().getReference("/calendar/$uid/$date/studies")
+        ref2.addValueEventListener(object : ValueEventListener {
+            override fun onCancelled(error: DatabaseError) {
+            }
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.key.equals("studies")) {
+                    studies1 = snapshot.getValue<ArrayList<Study>>()!!
+//                    for(p0 in snapshot.children)
+//                    {
+//                        val p1 = p0.getValue(Study::class.java)
+//                        if(p1 != null)
+//                        {
+//                            studies1.studies.add(p1)
+//                        }
+//                    }
+                }
+
+            }
+        })
+        chronometer.base=SystemClock.elapsedRealtime()+timer.realStudyTime
+        totalStudy?.base = SystemClock.elapsedRealtime()+timer.totalStudyTime
+        focusStudy.base =SystemClock.elapsedRealtime()+0
+        lasttime = timer.realStudyTime
+        chronometer.start()
+        totalStudy?.start()
+        focusStudy.start()
+        starthour = calendar.get(Calendar.HOUR_OF_DAY)
+        startminute = calendar.get(Calendar.MINUTE)
+        study1.startTime="$starthour:$startminute"
+        realStudy1.realStudyStartTime ="$starthour:$startminute"
         mPreview = findViewById<View>(R.id.preview) as CameraSourcePreview
         mGraphicOverlay = findViewById<View>(R.id.faceOverlay) as GraphicOverlay
 
@@ -86,20 +164,7 @@ class TimerActivity : AppCompatActivity() {
         }
 
         btnPause.setOnClickListener {
-            val intent = Intent(this, TimerActivity::class.java)
-            chronometer.stop();
-            val calendar = Calendar.getInstance()
-            val year = calendar.get(Calendar.YEAR)
-            val month = calendar.get(Calendar.MONTH) +1
-            val day = calendar.get(Calendar.DATE)
-            val date = "$year$month$day"
-            val uid = FirebaseAuth.getInstance().uid
-            Log.d("타이머", "" + uid)
-            time = chronometer.base-SystemClock.elapsedRealtime()
-            val ref =FirebaseDatabase.getInstance().getReference("/calendar/$uid/$date/result")
-            Log.d("파베 경로", "" + ref)
-            ref.setValue(Cal(time))
-            Log.d("time1111", "" + time)
+            storeDB()
             AlertDialog.Builder(this)
                 .setMessage("기록되었습니다.")
                 .setPositiveButton("OK",
@@ -110,6 +175,7 @@ class TimerActivity : AppCompatActivity() {
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         when (keyCode) {
             KeyEvent.KEYCODE_BACK -> {
+                storeDB()
                 AlertDialog.Builder(this)
                     .setMessage("기록되었습니다.")
                     .setPositiveButton("OK",
@@ -119,6 +185,60 @@ class TimerActivity : AppCompatActivity() {
             }
         }
         return true
+    }
+    private fun storeDB(){
+        val intent = Intent(this, TimerActivity::class.java)
+        chronometer.stop();
+        calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH) +1
+        val day = calendar.get(Calendar.DATE)
+        var date = "$year"
+        if(month<10)
+        {
+            date+="0$month"
+        }else
+        {
+            date+="$month"
+        }
+        if(day<10)
+        {
+            date+="0$day"
+        }else
+        {
+            date+="$day"
+        }
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        val minute = calendar.get(Calendar.MINUTE)
+        val uid = FirebaseAuth.getInstance().uid
+        Log.d("타이머", "" + uid)
+        chronometer.stop()
+        totalStudy?.stop()
+        timer.realStudyTime = chronometer.base-SystemClock.elapsedRealtime()
+        timer.totalStudyTime = totalStudy.base - SystemClock.elapsedRealtime()
+        var ref =FirebaseDatabase.getInstance().getReference("/calendar/$uid/$date/result")
+        ref.setValue(timer)
+
+        study1.endTime="$hour:$minute"
+
+        if(flag)
+        {
+            realStudy1.realStudyEndTime = "$hour:$minute"
+            val tmp = RealStudy(realStudy1.realStudyStartTime,realStudy1.realStudyEndTime)
+            study1.realStudy?.add(tmp)
+            val fstudyTime = focusStudy.base-SystemClock.elapsedRealtime()
+            focusStudy.stop()
+            if(timer.maxFocusStudyTime > fstudyTime)
+            {
+                timer.maxFocusStudyTime = fstudyTime
+            }
+        }
+
+        studies1.add(study1)
+        Log.d("올림",""+studies1)
+        ref =FirebaseDatabase.getInstance().getReference("/calendar/$uid/$date/studies")
+        ref.setValue(studies1)
+
     }
     private fun requestCameraPermission() {
         Log.w(TAG, "Camera permission is not granted. Requesting permission")
@@ -149,13 +269,106 @@ class TimerActivity : AppCompatActivity() {
 
     private fun createCameraSource() {
         val context: Context = applicationContext
+
         val detector: FaceDetector = Builder(context)
             .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
             .setProminentFaceOnly(true)
             .build()
+
         detector.setProcessor(
-            MultiProcessor.Builder(GraphicFaceTrackerFactory(mGraphicOverlay!!))
-                .build()
+
+            object : Detector.Processor<Face>{
+                override fun release() {
+                    mGraphicOverlay?.clear()
+                }
+
+                override fun receiveDetections(detections: Detections<Face>) {
+                    mGraphicOverlay?.clear()
+                    var faces = detections?.detectedItems
+
+
+                    if(faces.size()>0)
+                    {
+                        if(faces.valueAt(0).isLeftEyeOpenProbability<0.1&&faces.valueAt(0).isRightEyeOpenProbability<0.1)
+                        { // 자고 있나?
+                            if(noFlag)
+                            {
+                                noStudy.base = SystemClock.elapsedRealtime()+0
+                                noFlag = false
+                            }else if((-10000)>(noStudy.base-SystemClock.elapsedRealtime()))
+                            {
+                                if(flag)
+                                {
+                                    lasttime = chronometer.base-SystemClock.elapsedRealtime()
+                                    chronometer.stop()
+                                    flag = false
+                                    calendar = Calendar.getInstance()
+                                    val hour = calendar.get(Calendar.HOUR_OF_DAY)
+                                    val minute = calendar.get(Calendar.MINUTE)
+                                    realStudy1.realStudyEndTime ="$hour:$minute"
+                                    val tmp = RealStudy(realStudy1.realStudyStartTime,realStudy1.realStudyEndTime)
+                                    study1.realStudy?.add(tmp)
+                                    val fstudyTime = focusStudy.base-SystemClock.elapsedRealtime()
+                                    focusStudy.stop()
+                                    if(timer.maxFocusStudyTime > fstudyTime)
+                                    {
+                                        timer.maxFocusStudyTime = fstudyTime
+                                    }
+                                }
+                            }
+
+                        }
+                        else if(!flag){
+                            chronometer.base = SystemClock.elapsedRealtime()+lasttime
+                            focusStudy.base =SystemClock.elapsedRealtime()+0
+                            chronometer.start()
+                            focusStudy.start()
+                            flag = true
+                            noFlag = true
+                            calendar = Calendar.getInstance()
+                            starthour = calendar.get(Calendar.HOUR_OF_DAY)
+                            startminute = calendar.get(Calendar.MINUTE)
+                            realStudy1.realStudyStartTime ="$starthour:$startminute"
+
+                        }
+
+                        val graphic = FaceGraphic(mGraphicOverlay, faces.valueAt(0))
+                        mGraphicOverlay?.add(graphic)
+
+
+                    }
+                    else{
+                        // 얼굴이 화면에 없음
+
+                        if(noFlag)
+                        {
+                            noStudy.base = SystemClock.elapsedRealtime()+0
+                            noFlag = false
+                        }else if((-10000)>(noStudy.base-SystemClock.elapsedRealtime()))
+                        {
+                            if(flag)
+                            {
+                                lasttime = chronometer.base-SystemClock.elapsedRealtime()
+                                chronometer.stop()
+                                flag = false
+                                calendar = Calendar.getInstance()
+                                val hour = calendar.get(Calendar.HOUR_OF_DAY)
+                                val minute = calendar.get(Calendar.MINUTE)
+                                realStudy1.realStudyEndTime ="$hour:$minute"
+                                val tmp = RealStudy(realStudy1.realStudyStartTime,realStudy1.realStudyEndTime)
+                                study1.realStudy?.add(tmp)
+                                val fstudyTime = focusStudy.base-SystemClock.elapsedRealtime()
+                                focusStudy.stop()
+                                if(timer.maxFocusStudyTime > fstudyTime)
+                                {
+                                    timer.maxFocusStudyTime = fstudyTime
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
         )
         if (!detector.isOperational()) {
 
@@ -214,46 +427,6 @@ class TimerActivity : AppCompatActivity() {
         }
     }
 
-    private class GraphicFaceTracker(overlay: GraphicOverlay): Tracker<Face>() {
-        private var mOverlay: GraphicOverlay? = null
-        private var mFaceGraphic: FaceGraphic? = null
-
-        override fun onNewItem(faceId: Int, item: Face?) {
-            mFaceGraphic?.setId(faceId)
-        }
-
-        /**
-         * Update the position/characteristics of the face within the overlay.
-         */
-        override fun onUpdate(detectionResults: Detections<Face?>, face: Face?) {
-            mOverlay?.add(mFaceGraphic!!)
-            mFaceGraphic?.updateFace(face)
-        }
-
-        /**
-         * Hide the graphic when the corresponding face was not detected.  This can happen for
-         * intermediate frames temporarily (e.g., if the face was momentarily blocked from
-         * view).
-         */
-        override fun onMissing(detectionResults: Detections<Face?>) {
-            mOverlay?.remove(mFaceGraphic)
-        }
-
-        /**
-         * Called when the face is assumed to be gone for good. Remove the graphic annotation from
-         * the overlay.
-         */
-        override fun onDone() {
-            mOverlay?.remove(mFaceGraphic)
-        }
-
-        init {
-            mOverlay = overlay
-            mFaceGraphic = FaceGraphic(overlay)
-        }
-
-    }
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
@@ -283,9 +456,3 @@ class TimerActivity : AppCompatActivity() {
             .show()
     }
 }
-
-data class Cal(
-    var totalstudytime: Long = 0,
-    var realstudytime: Long = 0,
-    var maxfocusstudytime: Long = 0
-)

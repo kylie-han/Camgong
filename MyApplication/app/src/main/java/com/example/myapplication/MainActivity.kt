@@ -1,14 +1,11 @@
 package com.example.myapplication
 
-import android.app.AlertDialog
-import android.content.DialogInterface
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.KeyEvent
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.layout_calendar.*
 import com.google.android.material.tabs.TabLayoutMediator
-import kotlinx.android.synthetic.main.layout_home.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,6 +16,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         init()
 
+//        tabs.setScrollPosition(1,0f,true)
+        view_pager.setCurrentItem(1)
     }
 
     private fun init() {
@@ -29,6 +28,7 @@ class MainActivity : AppCompatActivity() {
             tab.text = tabTextList[position]
         }.attach()
     }
+
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         when (keyCode) {

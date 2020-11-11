@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.example.myapplication.PageAdapterInner
 import com.example.myapplication.R
 import com.example.myapplication.models.DailyGoal
 import com.example.myapplication.models.Result
@@ -16,6 +17,7 @@ import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.PercentFormatter
 import com.github.mikephil.charting.utils.MPPointF
+import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -28,7 +30,7 @@ import kotlin.collections.ArrayList
 
 
 class FragmentTabCalendar : Fragment() {
-    private val tabTextList = arrayListOf("Calendar", "HOME", "STATS")
+    private val tabTextList = arrayListOf("일간", "주간", "월간")
     // 주, 월의 공부시간 정보 저장할 배열, 총시간 / 실제 공부시간 / 최대 집중시간 / 휴식시간
     var monthInfo = mutableListOf<Long>(0,0,0,0)
     var weekInfo = mutableListOf<Long>(0,0,0,0)
@@ -71,8 +73,6 @@ class FragmentTabCalendar : Fragment() {
                 isAchived(view, date) // 목표 달성여부 달력에 표시
 
                 // 달이 바뀌면 일, 주별 출력정보 + 차트는 초기화 시킴
-                view.tv_day.text = "일간 정보 없음"
-                view.tv_week.text = "주간 정보 없음"
                 for (i in 0..2){
                     weekInfo[i] = 0
                     monthInfo[i] = 0
@@ -84,7 +84,7 @@ class FragmentTabCalendar : Fragment() {
                 getMonthInfo(view, date) // 해당 월의 공부정보 가져옴
             }
         })// end of setOnMonthChangedListener
-
+        innerInit(view)
         return view
     }
 
@@ -152,7 +152,7 @@ class FragmentTabCalendar : Fragment() {
 //        pieChart.description.isEnabled = false
 //        pieChart.animateXY(1000, 1000);
 //    }
- 
+
     // 주별 공부비율과 휴식비율을 받아서 차트를 만듦
     private fun drawWeekPieChart(view: View, realTime: Long, breakTime: Long) {
         val pieChart = view.piechart
@@ -180,6 +180,7 @@ class FragmentTabCalendar : Fragment() {
         pieChart.highlightValues(null)
         pieChart.invalidate()
         pieChart.description.isEnabled = false
+        pieChart.setRotationEnabled(false)
         pieChart.animateXY(1000, 1000);
     }
 
@@ -241,18 +242,15 @@ class FragmentTabCalendar : Fragment() {
                         str += "최대 집중 시간: ${tc.msToStringTime(focusTime)}\n"
                         str += "휴식시간: ${tc.msToStringTime(breakTime)}\n"
 
-                        view.tv_day.text = str
 
                         // 휴식, 공부 비율 그래프로 출력
 //                        drawDayPieChart(view, realTime, breakTime)
                     }else{ // 정보가 없을경우 모든 값을 없음으로 처리
-                        view.tv_day.text = "당일 정보가 없음"
                     }
                 }// end of outer if()
             }
 
             override fun onCancelled(error: DatabaseError) {
-                view.tv_day.text = "Failed"
                 println("Failed to read Value")
             }
 
@@ -315,7 +313,6 @@ class FragmentTabCalendar : Fragment() {
     // 1주일의 공부 정보 View에 표시
     private fun displayWeek(view: View) {
         if(weekInfo[0] == 0L) {
-            view.tv_week.text = "이번주에 공부한 내역이 없습니다."
             drawWeekPieChart(view, 0, 100)
         }
         else{
@@ -326,7 +323,6 @@ class FragmentTabCalendar : Fragment() {
             str += "최대 집중시간: ${tc.msToStringTime(weekInfo[2])}\n"
             str += "휴식 시간: ${tc.msToStringTime(weekInfo[3])}\n"
 
-            view.tv_week.text = str
             drawWeekPieChart(view, weekInfo[1], weekInfo[3])
         }
     }
@@ -374,7 +370,6 @@ class FragmentTabCalendar : Fragment() {
     // 1달의 공부 정보 View에 표시
     private fun displayMonth(view: View) {
         if(monthInfo[0] == 0L) {
-            view.tv_month.text = "한달동안 공부한 내역이 없습니다."
 //            drawMonthPieChart(view, 0, 100)
         }
         else{
@@ -385,7 +380,6 @@ class FragmentTabCalendar : Fragment() {
             str += "최대 집중시간: ${tc.msToStringTime(monthInfo[2])}\n"
             str += "휴식 시간: ${tc.msToStringTime(monthInfo[3])}\n"
 
-            view.tv_month.text = str
 //            drawMonthPieChart(view, monthInfo[1], monthInfo[3])
         }
     }
@@ -430,5 +424,12 @@ class FragmentTabCalendar : Fragment() {
             })
         }// end of for
     } // end of isAchived()
+    private fun innerInit(view: View) {
+        view.view_pager_in.adapter = PageAdapterInner(this)
+        TabLayoutMediator(view.tab_in, view.view_pager_in) {
+                tab, position ->
+            tab.text = tabTextList[position]
+        }.attach()
+    }
 
 }
