@@ -39,7 +39,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/calendar"
                 app:tabGravity="fill"
-                app:tabIndicatorColor="#C7A2CD"
+                app:tabIndicatorColor="@color/calendar"
                 app:tabIndicatorGravity="bottom"
                 app:tabMaxWidth="0dp"
                 app:tabMode="fixed" />

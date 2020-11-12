@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:tabGravity="fill"
-        app:tabIndicatorColor="#C7A2CD"
+        app:tabIndicatorColor="@color/calendar"
         app:tabIndicatorGravity="top"
         app:tabMaxWidth="0dp"
         app:tabMode="fixed" />
