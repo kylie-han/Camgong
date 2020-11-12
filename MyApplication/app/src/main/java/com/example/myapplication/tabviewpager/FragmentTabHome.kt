@@ -6,6 +6,8 @@ import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.example.myapplication.CustomDialog
@@ -134,11 +136,5 @@ class FragmentTabHome  : Fragment() {
     }
 
 
-//
-//    var listener: DrawerListener = object : DrawerListener {
-//        override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
-//        override fun onDrawerOpened(drawerView: View) {}
-//        override fun onDrawerClosed(drawerView: View) {}
-//        override fun onDrawerStateChanged(newState: Int) {}
-//    }
+
 }
