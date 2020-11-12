@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:id="@+id/drawer_layout">
 
-
     <RelativeLayout
         android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -38,18 +37,19 @@
         android:textColor="@color/textBlack"
         android:textSize="55sp" />
 
-    <ImageButton
-        android:id="@+id/btnStart"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="400dp"
-        android:background="@drawable/round_button"
-        android:clickable="true"
-        android:contentDescription="@string/text_default"
-        android:focusable="true"
-        app:srcCompat="@android:drawable/ic_media_play" />
+        <ImageButton
+            android:id="@+id/btnStart"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="400dp"
+            android:background="@drawable/round_button"
+            android:clickable="true"
+            android:contentDescription="@string/text_default"
+            android:focusable="true"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/play" />
 
     <Button
         android:id="@+id/btnMenu"

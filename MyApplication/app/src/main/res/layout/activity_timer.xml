@@ -19,7 +19,8 @@
         android:clickable="true"
         android:contentDescription="@string/text_default"
         android:focusable="true"
-        app:srcCompat="@android:drawable/ic_media_pause" />
+        android:scaleType="fitCenter"
+        app:srcCompat="@drawable/stop" />
 
 
 
