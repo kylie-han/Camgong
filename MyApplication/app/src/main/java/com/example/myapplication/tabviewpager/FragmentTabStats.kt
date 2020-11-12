@@ -374,11 +374,11 @@ class FragmentTabStats : Fragment() {
                             maxValue3 = array[i]
                         }
                     }
-                    if (maxValue1 != 0) recommendTime1.text = "$max1:00~${max1 + 1}:00"
+                    if (maxValue1 != 0) recommendTime1.text = "${max1}시~${max1 + 1}시"
                     else recommendTime1.text = "**"
-                    if (maxValue2 != 0) recommendTime2.text = "$max2:00~${max2 + 1}:00"
+                    if (maxValue2 != 0) recommendTime2.text = "${max2}시~${max2 + 1}시"
                     else recommendTime2.text = "**"
-                    if (maxValue3 != 0) recommendTime3.text = "$max3:00~${max3 + 1}:00"
+                    if (maxValue3 != 0) recommendTime3.text = "${max3}시~${max3 + 1}시"
                     else recommendTime3.text = "**"
                 }
             }
