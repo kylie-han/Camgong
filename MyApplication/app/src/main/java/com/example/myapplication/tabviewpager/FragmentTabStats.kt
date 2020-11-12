@@ -1,5 +1,6 @@
 package com.example.myapplication.tabviewpager
 
+import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.app.DatePickerDialog.OnDateSetListener
 import android.content.Intent
@@ -10,12 +11,9 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
-import androidx.core.view.marginLeft
-import androidx.core.view.marginStart
 import androidx.fragment.app.Fragment
 import com.example.myapplication.GoalActivity
 import com.example.myapplication.R
@@ -31,7 +29,6 @@ import kotlinx.android.synthetic.main.layout_stats.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 
 // DATE class를 사용하기 위한 API제한
@@ -50,6 +47,7 @@ class FragmentTabStats : Fragment() {
     var studiesValueEventListener: ValueEventListener? = null
 
 
+    @SuppressLint("SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -60,15 +58,15 @@ class FragmentTabStats : Fragment() {
         if (user == null) {
             Log.d(TAG, "user doesn't exist")
         } else {
-            var uid = user.uid
+            val uid = user.uid
             val database = Firebase.database
             updateData(database, uid)
             view.calendarText.text = "$year.$month.$date"
 
-            val tv_date = view.calendarText
+            val tvDate = view.calendarText
 
-            var myDatePicker =
-                OnDateSetListener { view, year, month, dayOfMonth ->
+            val myDatePicker =
+                OnDateSetListener { _, year, month, dayOfMonth ->
                     calendar.set(Calendar.YEAR, year)
                     calendar.set(Calendar.MONTH, month)
                     calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
@@ -76,7 +74,7 @@ class FragmentTabStats : Fragment() {
                     updateData(database, uid)
                 }
 
-            tv_date.setOnClickListener {
+            tvDate.setOnClickListener {
                 context?.let { it1 ->
                     DatePickerDialog(
                         it1, R.style.DatePickerTheme,
@@ -97,28 +95,6 @@ class FragmentTabStats : Fragment() {
         return view
     }
 
-    private fun resultWrite(myRef: DatabaseReference) {
-        val destination = myRef.child("/result")
-        val focusTime = FocusStudyTime("13:00:00", "14:00:00")
-        val focusStudyTime: MutableList<FocusStudyTime> = mutableListOf(focusTime)
-        val maxFocusStudyTime = TimeCalculator().stringToLong("00:30:00")
-        val realStudyTime = TimeCalculator().stringToLong("01:30:00")
-        val totalStudyTime = realStudyTime + 10000
-        val result = Result(focusStudyTime, maxFocusStudyTime, realStudyTime, totalStudyTime)
-        destination.setValue(result)
-    }
-
-    private fun studyWrite(myRef: DatabaseReference) {
-        val destination = myRef.child("/studies")
-        val realstart = "13:30:00"
-        val realend = "13:50:00"
-        val realStudy = RealStudy(realstart, realend)
-        val startTime = "13:00:00"
-        val endTime = "14:00:00"
-        val study = Study(startTime, endTime, mutableListOf(realStudy))
-        destination.setValue(mutableListOf(study))
-    }
-
     private fun updateLabel() {
         val myFormat = "yyyy.MM.dd"
         val sdf = SimpleDateFormat(myFormat, Locale.KOREA)
@@ -131,8 +107,8 @@ class FragmentTabStats : Fragment() {
         val day = sdf.format(calendar.time)
         val myRef = database.getReference("calendar/$uid/$day")
         var dailyReal = 0L
-        var dailygoalTime = 0L
-        var dailyGoalStatus = false
+        var dailyGoalTime = 0L
+        var dailyGoalStatus: Boolean
 
         if (resultValueEventListener != null) myRef.removeEventListener(resultValueEventListener!!)
         if (dailyGoalValueEventListener != null) myRef.removeEventListener(
@@ -144,6 +120,7 @@ class FragmentTabStats : Fragment() {
 
         resultValueEventListener =
             myRef.child("/result").addValueEventListener(object : ValueEventListener {
+                @SuppressLint("SetTextI18n")
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val value = snapshot.getValue<Result>()
                     if (value == null) {
@@ -158,11 +135,11 @@ class FragmentTabStats : Fragment() {
                             8
                         )
                         // 총 공부 시간
-                        timeText.text = "$total"
+                        timeText.text = total
                         // 실제 공부한 시간
                         dailyReal = value.realStudyTime
 
-                        dailyGoalStatus = dailygoalTime + dailyReal <= 0
+                        dailyGoalStatus = dailyGoalTime + dailyReal <= 0
                         myRef.child("/dailyGoal/goalStatus")
                             .setValue(dailyGoalStatus)
 
@@ -173,14 +150,14 @@ class FragmentTabStats : Fragment() {
                             0,
                             8
                         )
-                        realTime.text = "$real"
+                        realTime.text = real
                         //최대 공부 시간 : maxFocusStudyTime
                         val max =
                             TimeCalculator().msToStringTime(value.maxFocusStudyTime).substring(
                                 0,
                                 8
                             )
-                        maxFocusTime.text = "${max}"
+                        maxFocusTime.text = max
 
                     }
                 }
@@ -192,6 +169,7 @@ class FragmentTabStats : Fragment() {
             })
         dailyGoalValueEventListener =
             myRef.child("/dailyGoal/goalTime").addValueEventListener(object : ValueEventListener {
+                @SuppressLint("SetTextI18n")
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val value = snapshot.getValue<Long>()
                     if (value == null) {
@@ -199,9 +177,9 @@ class FragmentTabStats : Fragment() {
                         goalTime.text = "00:00:00"
                     } else {
                         val goal = TimeCalculator().msToStringTime(value).substring(0, 8)
-                        goalTime.text = "$goal"
-                        dailygoalTime = value
-                        dailyGoalStatus = dailygoalTime + dailyReal <= 0
+                        goalTime.text = goal
+                        dailyGoalTime = value
+                        dailyGoalStatus = dailyGoalTime + dailyReal <= 0
                         myRef.child("/dailyGoal/goalStatus")
                             .setValue(dailyGoalStatus)
                         if (dailyGoalStatus) imageGoal.visibility = View.VISIBLE
@@ -216,11 +194,13 @@ class FragmentTabStats : Fragment() {
             })
         studiesValueEventListener =
             myRef.child("/studies").addValueEventListener(object : ValueEventListener {
+                @SuppressLint("SetTextI18n")
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val value = snapshot.getValue<ArrayList<Study>>()
                     var tableRow = TableRow(context)
                     table_layout.addView(tableRow)
-                    if (tableRow != null) (tableRow.parent as ViewGroup).removeAllViews()
+//                    if(tableRow != null)
+                    (tableRow.parent as ViewGroup).removeAllViews()
                     if (value == null) {
                         Log.d(TAG, "Studies가 없음")
                         for (time in 0..23) {
@@ -229,7 +209,7 @@ class FragmentTabStats : Fragment() {
                                 ViewGroup.LayoutParams.MATCH_PARENT,
                                 ViewGroup.LayoutParams.MATCH_PARENT
                             )
-                            lp.setMargins(2,2,2,2)
+                            lp.setMargins(2, 2, 2, 2)
                             tableRow.layoutParams = lp
                             for (i in 0..6) {
                                 val textView = TextView(context)
@@ -240,7 +220,7 @@ class FragmentTabStats : Fragment() {
                                 }
                                 textView.setBackgroundColor(Color.WHITE)
                                 textView.gravity = Gravity.CENTER
-                                textView.height = (resources.displayMetrics.density*30).toInt()
+                                textView.height = (resources.displayMetrics.density * 30).toInt()
 //                                textView.setMarginLeft((resources.displayMetrics.density*3).toInt())
                                 tableRow.addView(textView)
                             }
@@ -248,16 +228,15 @@ class FragmentTabStats : Fragment() {
                         }
 
                     } else {
-                        val studies = value
                         // list : 00:00:00 ~23:59:59
                         // 10분단위로 체크
                         // 0시 0분-0시 10분 : tr0_td1
-                        var colorTable = Array(24) {
+                        val colorTable = Array(24) {
                             arrayOfNulls<String>(
                                 7
                             )
                         }
-                        for (study in studies) {
+                        for (study in value) {
                             val startHour = study.startTime.substring(0, 2).toInt()  // 00~23 시간
                             val startMin = (study.startTime.substring(3, 5)
                                 .toInt() + 5) / 10  // 0~4 : td1, 5~14 : td2, 55~59 : X =>1~6
@@ -267,12 +246,12 @@ class FragmentTabStats : Fragment() {
                             for (array in colorTable.indices) {
                                 for (item in colorTable[startHour].indices) {
                                     if (item > startMin) {
-                                        colorTable[startHour][item] = "#E1CFFF"
+                                        colorTable[startHour][item] = "#7AF0FF"
                                     }
                                 }
                                 if (array in startHour + 1 until endHour) {
                                     for (item in 1 until colorTable[array].size) {
-                                        colorTable[array][item] = "#E1CFFF"
+                                        colorTable[array][item] = "#7AF0FF"
                                     }
 
                                 }
@@ -291,19 +270,19 @@ class FragmentTabStats : Fragment() {
                                 val reMin = (time.realStudyEndTime.substring(3, 5).toInt() + 5) / 10
                                 if (rsHour == reHour) {
                                     for (i in rsMin until reMin + 1) {
-                                        colorTable[rsHour][i] = "#7D5BAE"
+                                        colorTable[rsHour][i] = "#34C7DA"
                                     }
                                 } else if (rsHour < reHour) {
                                     for (i in rsMin until colorTable[rsHour].size) {
-                                        colorTable[rsHour][i] = "#7D5BAE"
+                                        colorTable[rsHour][i] = "#34C7DA"
                                     }
                                     for (i in rsHour + 1 until reHour) {
                                         for (j in 1 until colorTable[rsHour].size) {
-                                            colorTable[rsHour][i] = "#7D5BAE"
+                                            colorTable[rsHour][i] = "#34C7DA"
                                         }
                                     }
                                     for (i in 1 until reMin) {
-                                        colorTable[reHour][i] = "#7D5BAE"
+                                        colorTable[reHour][i] = "#34C7DA"
                                     }
                                 }
                             }
@@ -315,7 +294,7 @@ class FragmentTabStats : Fragment() {
                                 ViewGroup.LayoutParams.MATCH_PARENT,
                                 ViewGroup.LayoutParams.MATCH_PARENT
                             )
-                            lp.setMargins(2,2,2,2)
+                            lp.setMargins(2, 2, 2, 2)
                             tableRow.layoutParams = lp
                             for (i in 0..6) {
                                 val textView = TextView(context)
@@ -333,7 +312,7 @@ class FragmentTabStats : Fragment() {
                                     textView.setBackgroundColor(Color.WHITE)
                                 }
                                 textView.gravity = Gravity.CENTER
-                                textView.height = (resources.displayMetrics.density*30).toInt()
+                                textView.height = (resources.displayMetrics.density * 30).toInt()
                                 tableRow.addView(textView)
                             }
                             table_layout.addView(tableRow)
@@ -348,8 +327,9 @@ class FragmentTabStats : Fragment() {
         val ref = database.getReference("calendar/$uid")
         val array: Array<Int> = Array(24) { 0 }
         ref.addValueEventListener(object : ValueEventListener {
+            @SuppressLint("SetTextI18n")
             override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.value == null || snapshot.value!!.equals("")) {
+                if (snapshot.value == null || snapshot.value!! == "") {
                     Log.d(TAG, "아무런 값이 없음")
                 } else {
                     for (i in 1..7) {
@@ -359,22 +339,22 @@ class FragmentTabStats : Fragment() {
                                 .getValue<ArrayList<Study>>()
                         if (studies != null) {
                             studies.forEach {
-                                if (it.realStudy != null) {
-                                    for (time in it.realStudy) {
-                                        array[time.realStudyStartTime.substring(0, 2).toInt()]++
-                                        array[time.realStudyEndTime.substring(0, 2).toInt()]++
-                                    }
+                                for (time in it.realStudy) {
+                                    array[time.realStudyStartTime.substring(0, 2).toInt()]++
+                                    array[time.realStudyEndTime.substring(0, 2).toInt()]++
                                 }
+//                                if (it.realStudy != null) {
+//                                }
                             }
                         } else {
                             Log.d(TAG, "study 없음....")
                         }
                     }
-                    var max1 = 0;
-                    var max2 = 0;
+                    var max1 = 0
+                    var max2 = 0
                     var max3 = 0
-                    var maxValue1 = 0;
-                    var maxValue2 = 0;
+                    var maxValue1 = 0
+                    var maxValue2 = 0
                     var maxValue3 = 0
                     for (i in array.indices) {
                         if (array[i] > maxValue1) {
@@ -394,11 +374,11 @@ class FragmentTabStats : Fragment() {
                             maxValue3 = array[i]
                         }
                     }
-                    if (maxValue1 != 0) recommendTime1.text = "$max1:00~${max1 + 1}:00"
+                    if (maxValue1 != 0) recommendTime1.text = "${max1}시~${max1 + 1}시"
                     else recommendTime1.text = "**"
-                    if (maxValue2 != 0) recommendTime2.text = "$max2:00~${max2 + 1}:00"
+                    if (maxValue2 != 0) recommendTime2.text = "${max2}시~${max2 + 1}시"
                     else recommendTime2.text = "**"
-                    if (maxValue3 != 0) recommendTime3.text = "$max3:00~${max3 + 1}:00"
+                    if (maxValue3 != 0) recommendTime3.text = "${max3}시~${max3 + 1}시"
                     else recommendTime3.text = "**"
                 }
             }

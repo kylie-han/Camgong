@@ -22,15 +22,14 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="목표 설정"
+            android:text="@string/goal"
             android:textAlignment="center"
-            android:textSize="20dp"
+            android:textSize="20sp"
             />
         <TimePicker
             android:id="@+id/time_picker"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-
+            android:layout_height="0dp"
             android:layout_weight="1"
             android:timePickerMode="spinner" />
 
@@ -40,7 +39,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="70dp"
             android:layout_marginRight="70dp"
-            android:text="목표 설정"
+            android:text="@string/goal"
             app:layout_constraintTop_toBottomOf="@id/time_picker" />
 
 
