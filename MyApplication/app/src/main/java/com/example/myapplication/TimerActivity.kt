@@ -59,7 +59,7 @@ class TimerActivity : AppCompatActivity() {
     private val RC_HANDLE_CAMERA_PERM = 2
     private var noStudyTime: Long = 0
     private var lasttime: Long = 0
-    private var flag: Boolean = true
+    private var flag: Boolean = false
     private var noFlag: Boolean = true
     private var timer : Result = Result()
     private var calendar: Calendar = Calendar.getInstance()
@@ -117,6 +117,7 @@ class TimerActivity : AppCompatActivity() {
                         timer = Result(result.focusStudyTime,result.maxFocusStudyTime,result.realStudyTime,result.totalStudyTime)
                         chronometer.base=SystemClock.elapsedRealtime()+timer.realStudyTime
                         totalStudy?.base = SystemClock.elapsedRealtime()+timer.totalStudyTime
+                        lasttime = timer.realStudyTime
                     }
                 }
 
@@ -151,9 +152,7 @@ class TimerActivity : AppCompatActivity() {
         totalStudy?.base = SystemClock.elapsedRealtime()+timer.totalStudyTime
         focusStudy.base =SystemClock.elapsedRealtime()+0
         lasttime = timer.realStudyTime
-        chronometer.start()
         totalStudy?.start()
-        focusStudy.start()
         starthour = calendar.get(Calendar.HOUR_OF_DAY)
         startminute = calendar.get(Calendar.MINUTE)
         study1.startTime="$starthour:$startminute"
@@ -325,9 +324,6 @@ class TimerActivity : AppCompatActivity() {
                                     {
                                         study1.realStudy?.add(tmp)
                                     }
-                                    Log.d("눈",""+(noStudy.base-SystemClock.elapsedRealtime()))
-                                    Log.d("flag",""+flag)
-                                    Log.d("noFlag",""+noFlag)
                                 }
                             }
                         }
@@ -386,7 +382,6 @@ class TimerActivity : AppCompatActivity() {
                                 {
                                     study1.realStudy?.add(tmp)
                                 }
-                                Log.d("얼굴",""+(noStudy.base-SystemClock.elapsedRealtime()))
                             }
                         }
                     }
