@@ -81,10 +81,10 @@ class FragmentTabStats : Fragment() {
                 }
             }
         }
-        view.table_layout.setOnLongClickListener {
+        view.buttonGoal.setOnClickListener {
             startActivity(Intent(this.activity, GoalActivity::class.java))
-            return@setOnLongClickListener true
         }
+
         return view
     }
 
@@ -124,12 +124,14 @@ class FragmentTabStats : Fragment() {
         val myRef = database.getReference("calendar/$uid/$day")
         var dailyReal = 0L
         var dailygoalTime = 0L
+        var dailyGoalStatus = false
 
         if (resultValueEventListener != null) myRef.removeEventListener(resultValueEventListener!!)
         if (dailyGoalValueEventListener != null) myRef.removeEventListener(
             dailyGoalValueEventListener!!
         )
         if (studiesValueEventListener != null) myRef.removeEventListener(studiesValueEventListener!!)
+
         // [START read_message]
 
         resultValueEventListener =
@@ -152,8 +154,13 @@ class FragmentTabStats : Fragment() {
                         // 실제 공부한 시간
                         dailyReal = value.realStudyTime
 
+                        dailyGoalStatus = dailygoalTime + dailyReal <= 0
                         myRef.child("/dailyGoal/goalStatus")
-                            .setValue(dailygoalTime + dailyReal <= 0)
+                            .setValue(dailyGoalStatus)
+
+                        if(dailyGoalStatus) imageGoal.visibility = View.VISIBLE
+                        else imageGoal.visibility = View.INVISIBLE
+
                         val real = TimeCalculator().msToStringTime(value.realStudyTime).substring(
                             0,
                             8
@@ -195,16 +202,21 @@ class FragmentTabStats : Fragment() {
                 }
             })
         dailyGoalValueEventListener =
-            myRef.child("/dailyGoal").addValueEventListener(object : ValueEventListener {
+            myRef.child("/dailyGoal/goalTime").addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    val value = snapshot.getValue<DailyGoal>()
+                    val value = snapshot.getValue<Long>()
                     if (value == null) {
                         Log.d(TAG, "DailyGoal이 없음")
                         goalTime.text = "00:00:00"
                     } else {
-                        val goal = TimeCalculator().msToStringTime(value.goalTime).substring(0, 8)
+                        val goal = TimeCalculator().msToStringTime(value).substring(0, 8)
                         goalTime.text = "$goal"
-                        dailygoalTime = value.goalTime
+                        dailygoalTime = value
+                        dailyGoalStatus = dailygoalTime + dailyReal <= 0
+                        myRef.child("/dailyGoal/goalStatus")
+                            .setValue(dailyGoalStatus)
+                        if(dailyGoalStatus) imageGoal.visibility = View.VISIBLE
+                        else imageGoal.visibility = View.INVISIBLE
                     }
                 }
 
@@ -311,6 +323,7 @@ class FragmentTabStats : Fragment() {
                             table_layout.addView(tableRow)
                         }
                     }
+                    /////////////////////////////////
                 }
 
                 override fun onCancelled(error: DatabaseError) {

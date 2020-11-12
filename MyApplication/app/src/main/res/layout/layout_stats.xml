@@ -198,6 +198,7 @@
                 android:textSize="18sp" />
 
             <Button
+                android:id="@+id/buttonGoal"
                 android:layout_width="46dp"
                 android:layout_height="24dp"
                 android:layout_margin="0dp"
@@ -216,9 +217,11 @@
             android:textSize="26sp" />
 
         <ImageView
+            android:id="@+id/imageGoal"
             android:layout_width="130dp"
             android:layout_height="130dp"
             android:layout_gravity="center"
+            android:visibility="visible"
             android:src="@drawable/stamp" />
 
 
