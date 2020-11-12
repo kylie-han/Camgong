@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.TimePicker
+import com.example.myapplication.models.DailyGoal
 import com.example.myapplication.util.TimeCalculator
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
@@ -49,10 +50,11 @@ class GoalActivity : AppCompatActivity() {
 
     private fun goalWrite(myRef: DatabaseReference, timePicker: TimePicker) {
         // [START write_message]
-        val destination = myRef.child("/dailyGoal/goalTime")
+        val destination = myRef.child("/dailyGoal")
         var time = String.format("%02d:%02d:00",timePicker.hour,timePicker.minute)
         val goalTime = TimeCalculator().stringToLong(time)
-        destination.setValue(goalTime)
+        val goal = DailyGoal(false,goalTime)
+        destination.setValue(goal)
         // [END write_message]
     }
 }

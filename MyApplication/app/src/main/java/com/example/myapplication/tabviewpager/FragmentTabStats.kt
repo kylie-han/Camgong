@@ -3,11 +3,14 @@ package com.example.myapplication.tabviewpager
 import android.app.DatePickerDialog
 import android.app.DatePickerDialog.OnDateSetListener
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TableRow
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.example.myapplication.GoalActivity
 import com.example.myapplication.R
@@ -22,18 +25,18 @@ import kotlinx.android.synthetic.main.layout_stats.*
 import kotlinx.android.synthetic.main.layout_stats.view.*
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 // DATE class를 사용하기 위한 API제한
 class FragmentTabStats : Fragment() {
     // database에 연결
     private lateinit var database: DatabaseReference
+
     // Log의 TAG
     private val TAG = "FragmentTabStats"
     var calendar: Calendar = Calendar.getInstance()
     val year = calendar.get(Calendar.YEAR)
-    val month = calendar.get(Calendar.MONTH) +1
+    val month = calendar.get(Calendar.MONTH) + 1
     val date = calendar.get(Calendar.DATE)
     var resultValueEventListener: ValueEventListener? = null
     var dailyGoalValueEventListener: ValueEventListener? = null
@@ -87,18 +90,18 @@ class FragmentTabStats : Fragment() {
         return view
     }
 
-    private fun resultWrite(myRef: DatabaseReference){
+    private fun resultWrite(myRef: DatabaseReference) {
         val destination = myRef.child("/result")
         val focusTime = FocusStudyTime("13:00:00", "14:00:00")
         val focusStudyTime: MutableList<FocusStudyTime> = mutableListOf(focusTime)
         val maxFocusStudyTime = TimeCalculator().stringToLong("00:30:00")
         val realStudyTime = TimeCalculator().stringToLong("01:30:00")
-        val totalStudyTime = realStudyTime+10000
+        val totalStudyTime = realStudyTime + 10000
         val result = Result(focusStudyTime, maxFocusStudyTime, realStudyTime, totalStudyTime)
         destination.setValue(result)
     }
 
-    private fun studyWrite(myRef: DatabaseReference){
+    private fun studyWrite(myRef: DatabaseReference) {
         val destination = myRef.child("/studies")
         val realstart = "13:30:00"
         val realend = "13:50:00"
@@ -114,16 +117,23 @@ class FragmentTabStats : Fragment() {
         val sdf = SimpleDateFormat(myFormat, Locale.KOREA)
         calendarText.text = sdf.format(calendar.time)
     }
+
     private fun updateData(database: FirebaseDatabase, uid: String) {
         val myFormat = "yyyyMMdd"
         val sdf = SimpleDateFormat(myFormat, Locale.KOREA)
         val day = sdf.format(calendar.time)
         Log.e(TAG, "$day")
         val myRef = database.getReference("calendar/$uid/$day")
+        var dailyReal = 0L
+        var dailygoalTime = 0L
+        var dailyGoalStatus = false
 
-        if(resultValueEventListener != null) myRef.removeEventListener(resultValueEventListener!!)
-        if(dailyGoalValueEventListener != null) myRef.removeEventListener(dailyGoalValueEventListener!!)
-        if(studiesValueEventListener != null) myRef.removeEventListener(studiesValueEventListener!!)
+        if (resultValueEventListener != null) myRef.removeEventListener(resultValueEventListener!!)
+        if (dailyGoalValueEventListener != null) myRef.removeEventListener(
+            dailyGoalValueEventListener!!
+        )
+        if (studiesValueEventListener != null) myRef.removeEventListener(studiesValueEventListener!!)
+
         // [START read_message]
 
         resultValueEventListener =
@@ -144,6 +154,15 @@ class FragmentTabStats : Fragment() {
                         // 총 공부 시간
                         timeText.text = "$total"
                         // 실제 공부한 시간
+                        dailyReal = value.realStudyTime
+
+                        dailyGoalStatus = dailygoalTime + dailyReal <= 0
+                        myRef.child("/dailyGoal/goalStatus")
+                            .setValue(dailyGoalStatus)
+
+                        if(dailyGoalStatus) imageGoal.visibility = View.VISIBLE
+                        else imageGoal.visibility = View.INVISIBLE
+
                         val real = TimeCalculator().msToStringTime(value.realStudyTime).substring(
                             0,
                             8
@@ -185,15 +204,21 @@ class FragmentTabStats : Fragment() {
                 }
             })
         dailyGoalValueEventListener =
-            myRef.child("/dailyGoal").addValueEventListener(object : ValueEventListener {
+            myRef.child("/dailyGoal/goalTime").addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    val value = snapshot.getValue<DailyGoal>()
+                    val value = snapshot.getValue<Long>()
                     if (value == null) {
                         Log.d(TAG, "DailyGoal이 없음")
                         goalTime.text = "00:00:00"
                     } else {
-                        val goal = TimeCalculator().msToStringTime(value.goalTime).substring(0, 8)
+                        val goal = TimeCalculator().msToStringTime(value).substring(0, 8)
                         goalTime.text = "$goal"
+                        dailygoalTime = value
+                        dailyGoalStatus = dailygoalTime + dailyReal <= 0
+                        myRef.child("/dailyGoal/goalStatus")
+                            .setValue(dailyGoalStatus)
+                        if(dailyGoalStatus) imageGoal.visibility = View.VISIBLE
+                        else imageGoal.visibility = View.INVISIBLE
                     }
                 }
 
@@ -206,23 +231,101 @@ class FragmentTabStats : Fragment() {
             myRef.child("/studies").addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val value = snapshot.getValue<ArrayList<Study>>()
-                    if(value == null){
-                        Log.d(TAG,"Studies가 없음")
-                    }else {
+                    var tableRow = TableRow(context)
+                    table_layout.addView(tableRow)
+                    if (tableRow != null) (tableRow.parent as ViewGroup).removeAllViews()
+                    if (value == null) {
+                        Log.d(TAG, "Studies가 없음")
+                        for (time in 0..23) {
+                            tableRow = TableRow(context)
+                            tableRow.layoutParams = ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT
+                            )
+                            for (i in 0..6) {
+                                val textView = TextView(context)
+                                if (i == 0) {
+                                    textView.text = "${time}시"
+                                } else {
+                                    textView.text = ""
+                                }
+                                textView.setBackgroundColor(Color.WHITE)
+                                tableRow.addView(textView)
+                            }
+                            table_layout.addView(tableRow)
+                        }
+
+                    } else {
                         val studies = value
                         // list : 00:00:00 ~23:59:59
                         // 10분단위로 체크
                         // 0시 0분-0시 10분 : tr0_td1
-                        for (study in studies){
-                            val startHour = study.startTime.substring(0,2)  // 00~23 시간
-                            val startMin = (study.startTime.substring(3,5).toInt()+5)/10+1    // 0~4 : td1, 5~14 : td2, 55~59 : X
-                            val endHour = study.endTime.substring(0,2)
-                            val endMin = (study.endTime.substring(3,5).toInt()) //0~4 : X, 5~14 : td
-                            val real: MutableList<RealStudy> = study.realStudy
-
+                        var colorTable = Array(24) {
+                            arrayOfNulls<String>(
+                                7
+                            )
                         }
-                        Log.d(TAG, value.toString())
+                        var startHour = 0
+                        var startMin = 0
+                        var endHour = 0
+                        var endMin = 0
+                        for (study in studies) {
+                            startHour = study.startTime.substring(0, 2).toInt()  // 00~23 시간
+                            startMin = (study.startTime.substring(3, 5)
+                                .toInt() + 5) / 10  // 0~4 : td1, 5~14 : td2, 55~59 : X =>1~6
+                            endHour = study.endTime.substring(0, 2).toInt()
+                            endMin = (study.endTime.substring(3, 5)
+                                .toInt() + 5) / 10  //0~4 : X, 5~14 : td
+                            val real: MutableList<RealStudy> = study.realStudy
+                            for (array in colorTable.indices) {
+                                for (item in colorTable[startHour].indices) {
+                                    if (item > startMin) {
+                                        colorTable[startHour][item] = "#E1CFFF"
+                                    }
+                                }
+                                if (array in startHour + 1 until endHour) {
+                                    for (item in 1 until colorTable[array].size) {
+                                        colorTable[array][item] = "#E1CFFF"
+                                    }
+
+                                }
+                                for (item in colorTable[endHour].indices) {
+                                    if (item > endMin) {
+                                        colorTable[endHour][item] = "#FFFFFF"
+                                    }
+                                }
+                            }
+                            Log.d(
+                                TAG,
+                                "$startHour : $startMin , $endHour : $endMin // ${real.toString()}"
+                            )
+                        }
+
+                        for (time in 0..23) {
+                            tableRow = TableRow(context)
+                            tableRow.layoutParams = ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT
+                            )
+                            for (i in 0..6) {
+                                val textView = TextView(context)
+                                if (i == 0) {
+                                    textView.text = "${time}시"
+                                } else {
+                                    textView.text = ""
+                                }
+                                if (colorTable[time][i] != null) textView.setBackgroundColor(
+                                    Color.parseColor(
+                                        colorTable[time][i]
+                                    )
+                                )
+                                else textView.setBackgroundColor(Color.WHITE)
+                                tableRow.addView(textView)
+                            }
+                            table_layout.addView(tableRow)
+                        }
                     }
+                    /////////////////////////////////
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -231,5 +334,4 @@ class FragmentTabStats : Fragment() {
             })
         // [END read_message]
     }
-
 }
