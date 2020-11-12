@@ -2,28 +2,28 @@ package com.example.myapplication.tabviewpager
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.Parcelable
 import android.os.SystemClock
-import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import com.example.myapplication.CustomDialog
+import com.example.myapplication.LoginActivity
 import com.example.myapplication.R
 import com.example.myapplication.TimerActivity
-import com.example.myapplication.models.FocusStudyTime
-import com.example.myapplication.models.RealStudy
 import com.example.myapplication.models.Result
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import kotlinx.android.synthetic.main.layout_home.view.*
-import java.util.Calendar
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import kotlinx.android.synthetic.main.layout_home.view.*
+import java.util.*
+
 
 class FragmentTabHome  : Fragment() {
+
     private var timer : Result = Result()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,19 +53,23 @@ class FragmentTabHome  : Fragment() {
         }
         val uid = FirebaseAuth.getInstance().uid
         val ref =FirebaseDatabase.getInstance().getReference("/calendar/$uid/$date/result")
-        ref.addValueEventListener(object : ValueEventListener{
+        ref.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
             }
 
             override fun onDataChange(snapshot: DataSnapshot) {
-                    if (snapshot.key.equals("result")) {
-                        val result = snapshot.getValue(Result::class.java)
-                        if(result!=null)
-                        {
-                            timer = Result(result.focusStudyTime,result.maxFocusStudyTime,result.realStudyTime,result.totalStudyTime)
-                            view.chronometer.base= SystemClock.elapsedRealtime()+timer.realStudyTime
-                        }
+                if (snapshot.key.equals("result")) {
+                    val result = snapshot.getValue(Result::class.java)
+                    if (result != null) {
+                        timer = Result(
+                            result.focusStudyTime,
+                            result.maxFocusStudyTime,
+                            result.realStudyTime,
+                            result.totalStudyTime
+                        )
+                        view.chronometer.base = SystemClock.elapsedRealtime() + timer.realStudyTime
                     }
+                }
 
             }
         })
@@ -89,6 +93,52 @@ class FragmentTabHome  : Fragment() {
 
         }
 
+        view.btnMenu.setOnClickListener{
+            view.drawer_layout.openDrawer(view.slide)
+        }
+        val firebaseAuth = FirebaseAuth.getInstance();
+
+        view.logout.setOnClickListener {
+            val intent = Intent(context, LoginActivity::class.java)
+            context?.let { it1 ->
+                CustomDialog(it1)
+                    .setMessage("로그아웃 하시겠습니까?")
+                    .setPositiveButton("OK") {
+                        FirebaseAuth.getInstance().signOut(); //로그아웃
+                        startActivity(intent)
+                    }.setNegativeButton("CANCEL") {
+                        null
+                    }.show()
+            }
+
+
+        }
+
+        view.delAcc.setOnClickListener {
+            val intent = Intent(context, LoginActivity::class.java)
+            context?.let { it1 ->
+                CustomDialog(it1)
+                    .setMessage("탈퇴하시겠습니까?")
+                    .setPositiveButton("OK") {
+                        firebaseAuth!!.getCurrentUser()?.delete() //회원탈퇴
+                        startActivity(intent)
+                    }.setNegativeButton("CANCEL") {
+                        null
+                    }.show()
+            }
+
+
+        }
+
         return view
     }
+
+
+//
+//    var listener: DrawerListener = object : DrawerListener {
+//        override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
+//        override fun onDrawerOpened(drawerView: View) {}
+//        override fun onDrawerClosed(drawerView: View) {}
+//        override fun onDrawerStateChanged(newState: Int) {}
+//    }
 }

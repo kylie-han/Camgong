@@ -9,7 +9,8 @@ import com.google.android.material.tabs.TabLayoutMediator
 
 class MainActivity : AppCompatActivity() {
 
-    private val tabTextList = arrayListOf("Calendar", "HOME", "STATS")
+//    private val tabTextList = arrayListOf("Calendar", "HOME", "STATS")
+    private val tabIconList = arrayListOf(R.drawable.pie_chart, R.drawable.house, R.drawable.calendar2)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,8 +25,8 @@ class MainActivity : AppCompatActivity() {
         view_pager.adapter = PageAdapter(this)
         TabLayoutMediator(tabs, view_pager) {
                 tab, position ->
-            tab.setIcon(R.mipmap.ic_new_launcher)
-            tab.text = tabTextList[position]
+            tab.setIcon(tabIconList[position])
+//            tab.text = tabTextList[position]
         }.attach()
     }
 

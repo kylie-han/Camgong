@@ -78,9 +78,10 @@ class FragmentTabStats : Fragment() {
                 }
             }
         }
-        view.table_layout.setOnLongClickListener {
+
+        // 테이블 롱클릭 -> 버튼 클릭 이벤트로 교체
+        view.btn_setting_goal.setOnClickListener {
             startActivity(Intent(this.activity, GoalActivity::class.java))
-            return@setOnLongClickListener true
         }
 
         return view
