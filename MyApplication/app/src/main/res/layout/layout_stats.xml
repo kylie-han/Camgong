@@ -234,8 +234,8 @@
             android:layout_width="130dp"
             android:layout_height="130dp"
             android:layout_gravity="center"
-            android:visibility="visible"
-            android:src="@drawable/stamp" />
+            android:src="@drawable/stamp"
+            android:visibility="invisible" />
 
 
     </LinearLayout>
