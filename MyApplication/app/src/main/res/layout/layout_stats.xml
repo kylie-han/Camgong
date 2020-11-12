@@ -107,7 +107,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="13:00~14:00"
+            android:text="**"
             android:textSize="26sp" />
 
         <TextView
@@ -115,7 +115,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="17:00~18:00"
+            android:text="**"
             android:textSize="26sp" />
 
         <TextView

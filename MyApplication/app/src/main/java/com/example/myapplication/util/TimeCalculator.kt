@@ -15,6 +15,7 @@ class TimeCalculator {
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
     private val timeFormatters = DateTimeFormatter.ofPattern("HH:mm:ss")
+    private val shortTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
     /**
      * today() : 오늘 날짜
@@ -33,31 +34,24 @@ class TimeCalculator {
     fun currentTime(): String{
         return current.format(timeFormatter)
     }
-    fun subTime(startTime: String, endTime: String): String {
-        val start = LocalTime.parse(startTime, timeFormatter)
-        val end = LocalTime.parse(endTime, timeFormatter)
-        val absSeconds = abs(Duration.between(start,end).seconds)
-        return String.format(
-            "%02d:%02d:%02d.%03d",
-            absSeconds / (60*60*1000),
-            absSeconds % (60*60*1000) / 60,
-            absSeconds % (60*60*1000) / (60*60),
-            absSeconds % 1000
-        )
+    fun subTime(startTime: String, endTime: String): Long {
+        val start = LocalTime.parse(startTime, shortTimeFormatter)
+        val end = LocalTime.parse(endTime, shortTimeFormatter)
+        return abs(Duration.between(start,end).seconds)
     }
 //    fun addTime(times: Map<String, FocusStudyTime>){
 //
 //
 //    }
-//    fun dateToString(date: LocalDate): String{
-//        return date.format(dateFormatter)
-//    }
+    fun dateToString(date: LocalDate): String{
+        return date.format(dateFormatter)
+    }
 //    fun timeToString(time: LocalTime): String{
 //        return time.format(timeFormatter)
 //    }
-//    fun stringToDate(date: String): LocalDate {
-//        return LocalDate.parse(date, dateFormatter)
-//    }
+    fun stringToDate(date: String): LocalDate {
+        return LocalDate.parse(date, dateFormatter)
+    }
 //    fun stringToTime(time: String): LocalTime {
 //        return LocalTime.parse(time, timeFormatter)
 //    }
