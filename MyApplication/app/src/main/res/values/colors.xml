@@ -9,7 +9,7 @@
     <color name="cancelBtnBackColor">#E2E2E2</color>
     <color name="calendar">#B9E9FF</color>
     <color name="white">#FFFFFF</color>
-    <color name="study">#D1B2FF</color>
-    <color name="focusStudy">#7D5BAE</color>
+    <color name="study">#7AF0FF</color>
+    <color name="focusStudy">#34C7DA</color>
 
 </resources>
