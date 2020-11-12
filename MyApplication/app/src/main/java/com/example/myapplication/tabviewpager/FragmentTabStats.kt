@@ -140,7 +140,7 @@ class FragmentTabStats : Fragment() {
                         Log.d(TAG, "Result가 없음")
                         timeText.text = "00:00:00"
                         realTime.text = "00:00:00"
-                        recommendTime.text = "00:00:00"
+//                        recommendTime.text = "00:00:00"
                         maxFocusTime.text = "00:00:00"
                     } else {
                         val total = TimeCalculator().msToStringTime(value.totalStudyTime).substring(
@@ -177,7 +177,7 @@ class FragmentTabStats : Fragment() {
                             if (i == 3) break
                             string += "${list[i].startTime} ~ ${list[i].endTime}\n"
                         }
-                        recommendTime.text = "${string}"
+//                        recommendTime.text = "${string}"
                         //최대 공부 시간 : maxFocusStudyTime
                         val max =
                             TimeCalculator().msToStringTime(value.maxFocusStudyTime).substring(

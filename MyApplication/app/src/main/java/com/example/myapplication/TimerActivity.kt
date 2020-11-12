@@ -43,6 +43,7 @@ import kotlinx.android.synthetic.main.layout_home.view.*
 import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.log
 
 
 class TimerActivity : AppCompatActivity() {
@@ -58,7 +59,7 @@ class TimerActivity : AppCompatActivity() {
     private val RC_HANDLE_CAMERA_PERM = 2
     private var noStudyTime: Long = 0
     private var lasttime: Long = 0
-    private var flag: Boolean = true
+    private var flag: Boolean = false
     private var noFlag: Boolean = true
     private var timer : Result = Result()
     private var calendar: Calendar = Calendar.getInstance()
@@ -116,6 +117,7 @@ class TimerActivity : AppCompatActivity() {
                         timer = Result(result.focusStudyTime,result.maxFocusStudyTime,result.realStudyTime,result.totalStudyTime)
                         chronometer.base=SystemClock.elapsedRealtime()+timer.realStudyTime
                         totalStudy?.base = SystemClock.elapsedRealtime()+timer.totalStudyTime
+                        lasttime = timer.realStudyTime
                     }
                 }
 
@@ -129,7 +131,11 @@ class TimerActivity : AppCompatActivity() {
 
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.key.equals("studies")) {
-                    studies1 = snapshot.getValue<ArrayList<Study>>()!!
+                    val tmp = snapshot.getValue()
+                    if(tmp!=null)
+                    {
+                        studies1 = snapshot.getValue<ArrayList<Study>>()!!
+                    }
 //                    for(p0 in snapshot.children)
 //                    {
 //                        val p1 = p0.getValue(Study::class.java)
@@ -146,9 +152,7 @@ class TimerActivity : AppCompatActivity() {
         totalStudy?.base = SystemClock.elapsedRealtime()+timer.totalStudyTime
         focusStudy.base =SystemClock.elapsedRealtime()+0
         lasttime = timer.realStudyTime
-        chronometer.start()
         totalStudy?.start()
-        focusStudy.start()
         starthour = calendar.get(Calendar.HOUR_OF_DAY)
         startminute = calendar.get(Calendar.MINUTE)
         study1.startTime="$starthour:$startminute"
@@ -225,17 +229,19 @@ class TimerActivity : AppCompatActivity() {
         {
             realStudy1.realStudyEndTime = "$hour:$minute"
             val tmp = RealStudy(realStudy1.realStudyStartTime,realStudy1.realStudyEndTime)
-            study1.realStudy?.add(tmp)
             val fstudyTime = focusStudy.base-SystemClock.elapsedRealtime()
             focusStudy.stop()
             if(timer.maxFocusStudyTime > fstudyTime)
             {
                 timer.maxFocusStudyTime = fstudyTime
             }
+            if(fstudyTime<(-300000))
+            {
+                study1.realStudy?.add(tmp)
+            }
         }
 
         studies1.add(study1)
-        Log.d("올림",""+studies1)
         ref =FirebaseDatabase.getInstance().getReference("/calendar/$uid/$date/studies")
         ref.setValue(studies1)
 
@@ -294,8 +300,9 @@ class TimerActivity : AppCompatActivity() {
                             if(noFlag)
                             {
                                 noStudy.base = SystemClock.elapsedRealtime()+0
+                                noStudy.start()
                                 noFlag = false
-                            }else if((-10000)>(noStudy.base-SystemClock.elapsedRealtime()))
+                            }else if((-60000)>(noStudy.base-SystemClock.elapsedRealtime()))
                             {
                                 if(flag)
                                 {
@@ -307,22 +314,27 @@ class TimerActivity : AppCompatActivity() {
                                     val minute = calendar.get(Calendar.MINUTE)
                                     realStudy1.realStudyEndTime ="$hour:$minute"
                                     val tmp = RealStudy(realStudy1.realStudyStartTime,realStudy1.realStudyEndTime)
-                                    study1.realStudy?.add(tmp)
                                     val fstudyTime = focusStudy.base-SystemClock.elapsedRealtime()
                                     focusStudy.stop()
                                     if(timer.maxFocusStudyTime > fstudyTime)
                                     {
                                         timer.maxFocusStudyTime = fstudyTime
                                     }
+                                    if(fstudyTime<(-300000))
+                                    {
+                                        study1.realStudy?.add(tmp)
+                                    }
                                 }
                             }
-
                         }
                         else if(!flag){
+                            // 안 자고 있는데 그 전에 공부 안 하는 중이 카운트 됐었음
                             chronometer.base = SystemClock.elapsedRealtime()+lasttime
                             focusStudy.base =SystemClock.elapsedRealtime()+0
+                            noStudy.base =SystemClock.elapsedRealtime()+0
                             chronometer.start()
                             focusStudy.start()
+                            noStudy.stop()
                             flag = true
                             noFlag = true
                             calendar = Calendar.getInstance()
@@ -330,6 +342,8 @@ class TimerActivity : AppCompatActivity() {
                             startminute = calendar.get(Calendar.MINUTE)
                             realStudy1.realStudyStartTime ="$starthour:$startminute"
 
+                        }else{
+                            noStudy.base = SystemClock.elapsedRealtime()+0
                         }
 
                         val graphic = FaceGraphic(mGraphicOverlay, faces.valueAt(0))
@@ -343,8 +357,9 @@ class TimerActivity : AppCompatActivity() {
                         if(noFlag)
                         {
                             noStudy.base = SystemClock.elapsedRealtime()+0
+                            noStudy.start()
                             noFlag = false
-                        }else if((-10000)>(noStudy.base-SystemClock.elapsedRealtime()))
+                        }else if((-60000)>(noStudy.base-SystemClock.elapsedRealtime()))
                         {
                             if(flag)
                             {
@@ -362,6 +377,10 @@ class TimerActivity : AppCompatActivity() {
                                 if(timer.maxFocusStudyTime > fstudyTime)
                                 {
                                     timer.maxFocusStudyTime = fstudyTime
+                                }
+                                if(fstudyTime<(-300000))
+                                {
+                                    study1.realStudy?.add(tmp)
                                 }
                             }
                         }
