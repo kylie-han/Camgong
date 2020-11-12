@@ -263,18 +263,13 @@ class FragmentTabStats : Fragment() {
                                 7
                             )
                         }
-                        var startHour = 0
-                        var startMin = 0
-                        var endHour = 0
-                        var endMin = 0
                         for (study in studies) {
-                            startHour = study.startTime.substring(0, 2).toInt()  // 00~23 시간
-                            startMin = (study.startTime.substring(3, 5)
+                            val startHour = study.startTime.substring(0, 2).toInt()  // 00~23 시간
+                            val startMin = (study.startTime.substring(3, 5)
                                 .toInt() + 5) / 10  // 0~4 : td1, 5~14 : td2, 55~59 : X =>1~6
-                            endHour = study.endTime.substring(0, 2).toInt()
-                            endMin = (study.endTime.substring(3, 5)
+                            val endHour = study.endTime.substring(0, 2).toInt()
+                            val endMin = (study.endTime.substring(3, 5)
                                 .toInt() + 5) / 10  //0~4 : X, 5~14 : td
-                            val real: MutableList<RealStudy> = study.realStudy
                             for (array in colorTable.indices) {
                                 for (item in colorTable[startHour].indices) {
                                     if (item > startMin) {
@@ -290,6 +285,30 @@ class FragmentTabStats : Fragment() {
                                 for (item in colorTable[endHour].indices) {
                                     if (item > endMin) {
                                         colorTable[endHour][item] = "#FFFFFF"
+                                    }
+                                }
+                            }
+                            val real: MutableList<RealStudy> = study.realStudy
+                            for (time in real){
+                                val rsHour = time.realStudyStartTime.substring(0,2).toInt()
+                                val rsMin = (time.realStudyStartTime.substring(3,5).toInt()+5)/10
+                                val reHour = time.realStudyEndTime.substring(0, 2).toInt()
+                                val reMin = (time.realStudyEndTime.substring(3, 5).toInt()+5)/10
+                                if(rsHour == reHour){
+                                    for (i in rsMin until reMin+1){
+                                        colorTable[rsHour][i] = "#7D5BAE"
+                                    }
+                                }else if(rsHour < reHour){
+                                    for (i in rsMin until colorTable[rsHour].size) {
+                                        colorTable[rsHour][i] = "#7D5BAE"
+                                    }
+                                    for (i in rsHour+1 until reHour){
+                                        for (j in 1 until colorTable[rsHour].size){
+                                            colorTable[rsHour][i] = "#7D5BAE"
+                                        }
+                                    }
+                                    for (i in 1 until reMin){
+                                        colorTable[reHour][i] = "#7D5BAE"
                                     }
                                 }
                             }
@@ -323,7 +342,6 @@ class FragmentTabStats : Fragment() {
                             table_layout.addView(tableRow)
                         }
                     }
-                    /////////////////////////////////
                 }
 
                 override fun onCancelled(error: DatabaseError) {
