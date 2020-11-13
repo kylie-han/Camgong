@@ -159,6 +159,7 @@ class FragmentTabCalendar : Fragment() {
         pieChart.invalidate()
         pieChart.description.isEnabled = false
         pieChart.animateXY(1000, 1000);
+        pieChart.setRotationEnabled(false)
     }
 
     // 1일 공부정보 가져옴
