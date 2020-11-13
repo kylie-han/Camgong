@@ -10,6 +10,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.FirebaseDatabase
@@ -21,6 +22,7 @@ class LoginActivity : AppCompatActivity() {
     private val RC_SIGN_IN = 9001// Google Login result
     private var googleSigninClient: GoogleSignInClient? = null// Google Api Client
     private var firebaseAuth: FirebaseAuth? = null// Firebase Auth
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +50,20 @@ class LoginActivity : AppCompatActivity() {
             finish()
         }
 
+
+    }
+
+    var time3: Long = 0
+    override fun onBackPressed() {
+        val time1 = System.currentTimeMillis()
+        val time2 = time1 - time3
+        if (time2 in 0..2000) {
+            finish()
+        }
+        else {
+            time3 = time1
+            Toast.makeText(applicationContext, "한번 더 누르시면 종료됩니다.",Toast.LENGTH_SHORT).show()
+        }
     }
 
 
@@ -83,6 +99,7 @@ class LoginActivity : AppCompatActivity() {
                     }
                     val intent = Intent(this, `MainActivity`::class.java) //페이지 이동 부분
                     startActivity(intent)
+                    finish()
                 } else {
                     Toast.makeText(this, "로그인 실패", Toast.LENGTH_SHORT).show()
                 }
