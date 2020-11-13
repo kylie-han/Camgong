@@ -17,38 +17,53 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:id="@+id/relative">
+
+
+
 
             <com.prolificinteractive.materialcalendarview.MaterialCalendarView
                 android:id="@+id/calendar"
                 android:layout_width="match_parent"
                 android:layout_height="455dp"
                 app:mcv_selectionColor="#a9dbf0cb"
-                app:mcv_showOtherDates="defaults" />
+                app:mcv_showOtherDates="defaults" >
 
+            </com.prolificinteractive.materialcalendarview.MaterialCalendarView>
 
-            <androidx.viewpager2.widget.ViewPager2
-                android:id="@+id/view_pager_in"
+            <LinearLayout
+                android:id="@+id/linearTab"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/tab_in" />
-
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/tab_in"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_below="@id/calendar"
-                app:tabGravity="fill"
-                app:tabIndicatorColor="@color/calendar"
-                app:tabIndicatorGravity="bottom"
-                app:tabMaxWidth="0dp"
-                app:tabMode="fixed" />
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnDaily"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="일간" />
+
+                <Button
+                    android:id="@+id/btnWeekly"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="주간" />
+
+                <Button
+                    android:id="@+id/btnMonthly"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="월간" />
+            </LinearLayout>
+
 
             <com.github.mikephil.charting.charts.PieChart
                 android:id="@+id/piechart"
                 android:layout_width="273dp"
                 android:layout_height="255dp"
-                android:layout_below="@id/view_pager_in"
+                android:layout_below="@id/linearTab"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="20dp" />
 
