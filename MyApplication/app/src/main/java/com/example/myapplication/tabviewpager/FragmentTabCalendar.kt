@@ -202,11 +202,14 @@ class FragmentTabCalendar : Fragment() {
 
     private fun displayDefault(view:View){
         drawPieChart(view, 0, 100)
-        view.msg1.text = "정"
-        view.msg2.text = "보"
-        view.msg3.text = "가"
-        view.msg4.text = "없"
-        view.msg5.text = "다"
+        view.msg1.text = "데이터가 존재하지 않습니다!"
+        view.msg2.text = ""
+        view.msg3.text = ""
+        view.msg4.text = ""
+        view.result1.text = ""
+        view.result2.text = ""
+        view.result3.text = ""
+        view.result4.text = ""
     }
 
     private fun displayDaily(view: View) {
@@ -220,12 +223,14 @@ class FragmentTabCalendar : Fragment() {
             if(real < 0) real *= -1
             if(rest < 0) rest *= -1
             drawPieChart(view, real, rest)
-            view.msg1.text = "총 공부 시간: ${tc.msToStringTime(dailyInfo[0])}"
-            view.msg2.text = "실제 공부 시간: ${tc.msToStringTime(dailyInfo[1])}"
-            view.msg3.text = "최대 집중시간: ${tc.msToStringTime(dailyInfo[2])}"
-            view.msg4.text = "휴식시간 : ${tc.msToStringTime(dailyInfo[3])}"
-            view.msg5.text = "공부 비율 : ${tc.getPercent(dailyInfo[1], dailyInfo[0])}%"
-            view.msg6.text = "휴식 비율: ${tc.getPercent(dailyInfo[3], dailyInfo[0])}%"
+            view.msg1.text = "총 공부 시간"
+            view.msg2.text = "실제 공부 시간"
+            view.msg3.text = "최대 집중시간"
+            view.msg4.text = "휴식시간"
+            view.result1.text = "${tc.msToStringTime(dailyInfo[0])}"
+            view.result2.text = "${tc.msToStringTime(dailyInfo[1])}"
+            view.result3.text = "${tc.msToStringTime(dailyInfo[2])}"
+            view.result4.text = "${tc.msToStringTime(dailyInfo[3])}"
         }
     }
 
@@ -294,12 +299,14 @@ class FragmentTabCalendar : Fragment() {
             if(real < 0) real *= -1
             if(rest < 0) rest *= -1
             drawPieChart(view, real, rest)
-            view.msg1.text = "총 시간: ${tc.msToStringTime(weeklyInfo[0])}"
-            view.msg2.text = "실제 시간: ${tc.msToStringTime(weeklyInfo[1])}"
-            view.msg3.text = "최대 집중시간: ${tc.msToStringTime(weeklyInfo[2])}"
-            view.msg4.text = "휴식 시간: ${tc.msToStringTime(weeklyInfo[3])}"
-            view.msg5.text = "공부 비율 : ${tc.getPercent(weeklyInfo[1], weeklyInfo[0])}%"
-            view.msg6.text = "휴식 비율: ${tc.getPercent(weeklyInfo[3], weeklyInfo[0])}%"
+            view.msg1.text = "총 공부 시간"
+            view.msg2.text = "실제 공부 시간"
+            view.msg3.text = "최대 집중시간"
+            view.msg4.text = "휴식시간"
+            view.result1.text = "${tc.msToStringTime(weeklyInfo[0])}"
+            view.result2.text = "${tc.msToStringTime(weeklyInfo[1])}"
+            view.result3.text = "${tc.msToStringTime(weeklyInfo[2])}"
+            view.result4.text = "${tc.msToStringTime(weeklyInfo[3])}"
         }
     }
 
@@ -355,12 +362,14 @@ class FragmentTabCalendar : Fragment() {
             if(rest < 0) rest *= -1
             drawPieChart(view, real, rest)
 
-            view.msg1.text = "총 시간: ${tc.msToStringTime(monthlyInfo[0])}\n"
-            view.msg2.text = "실제 시간: ${tc.msToStringTime(monthlyInfo[1])}\n"
-            view.msg3.text = "최대 집중시간: ${tc.msToStringTime(monthlyInfo[2])}\n"
-            view.msg4.text = "휴식 시간: ${tc.msToStringTime(monthlyInfo[3])}\n"
-            view.msg5.text = "공부 비율 : ${tc.getPercent(monthlyInfo[1], monthlyInfo[0])}%"
-            view.msg6.text = "휴식 비율: ${tc.getPercent(monthlyInfo[3], monthlyInfo[0])}%"
+            view.msg1.text = "총 시간"
+            view.msg2.text = "실제 시간"
+            view.msg3.text = "최대 집중시간"
+            view.msg4.text = "휴식 시간"
+            view.result1.text = "${tc.msToStringTime(monthlyInfo[0])}\n"
+            view.result2.text = "${tc.msToStringTime(monthlyInfo[1])}\n"
+            view.result3.text = "${tc.msToStringTime(monthlyInfo[2])}\n"
+            view.result4.text = "${tc.msToStringTime(monthlyInfo[3])}\n"
         }
     }
 
