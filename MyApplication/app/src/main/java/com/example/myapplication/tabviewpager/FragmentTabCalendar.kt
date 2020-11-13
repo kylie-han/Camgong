@@ -137,7 +137,7 @@ class FragmentTabCalendar : Fragment() {
         val time = ArrayList<PieEntry>()
         val listColors = ArrayList<Int>()
 
-// 여기 value에 데이터 값 넣어주세요
+        // 여기 value에 데이터 값 넣어주세요
         time.add(PieEntry(realTime.toFloat(), "공부"))
         listColors.add(resources.getColor(R.color.btnBackColor))
         time.add(PieEntry(breakTime.toFloat(), "휴식"))
@@ -214,7 +214,11 @@ class FragmentTabCalendar : Fragment() {
         }else{
             val tc = TimeCalculator()
             dailyInfo[3] = dailyInfo[0] - dailyInfo[1]
-            drawPieChart(view, dailyInfo[1], dailyInfo[3])
+            var real = dailyInfo[1]
+            var rest = dailyInfo[3]
+            if(real < 0) real *= -1
+            if(rest < 0) rest *= -1
+            drawPieChart(view, real, rest)
             view.msg1.text = "총 공부 시간: ${tc.msToStringTime(dailyInfo[0])}"
             view.msg2.text = "실제 공부 시간: ${tc.msToStringTime(dailyInfo[1])}"
             view.msg3.text = "최대 집중시간: ${tc.msToStringTime(dailyInfo[2])}"
@@ -284,7 +288,11 @@ class FragmentTabCalendar : Fragment() {
         else{
             val tc = TimeCalculator()
             weeklyInfo[3] = weeklyInfo[0] - weeklyInfo[1]
-            drawPieChart(view, weeklyInfo[1], weeklyInfo[3])
+            var real = weeklyInfo[1]
+            var rest = weeklyInfo[3]
+            if(real < 0) real *= -1
+            if(rest < 0) rest *= -1
+            drawPieChart(view, real, rest)
             view.msg1.text = "총 시간: ${tc.msToStringTime(weeklyInfo[0])}"
             view.msg2.text = "실제 시간: ${tc.msToStringTime(weeklyInfo[1])}"
             view.msg3.text = "최대 집중시간: ${tc.msToStringTime(weeklyInfo[2])}"
@@ -340,7 +348,11 @@ class FragmentTabCalendar : Fragment() {
         else{
             val tc = TimeCalculator()
             monthlyInfo[3] = monthlyInfo[0] - monthlyInfo[1]
-            drawPieChart(view, monthlyInfo[1], monthlyInfo[3])
+            var real = monthlyInfo[1]
+            var rest = monthlyInfo[3]
+            if(real < 0) real *= -1
+            if(rest < 0) rest *= -1
+            drawPieChart(view, real, rest)
 
             view.msg1.text = "총 시간: ${tc.msToStringTime(monthlyInfo[0])}\n"
             view.msg2.text = "실제 시간: ${tc.msToStringTime(monthlyInfo[1])}\n"
