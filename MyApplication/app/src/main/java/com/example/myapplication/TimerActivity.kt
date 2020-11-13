@@ -155,8 +155,8 @@ class TimerActivity : AppCompatActivity() {
         totalStudy?.start()
         starthour = calendar.get(Calendar.HOUR_OF_DAY)
         startminute = calendar.get(Calendar.MINUTE)
-        study1.startTime="$starthour:$startminute"
-        realStudy1.realStudyStartTime ="$starthour:$startminute"
+        study1.startTime=String.format("%2d:%2d",starthour,startminute)
+        realStudy1.realStudyStartTime =String.format("%2d:%2d",starthour,startminute)
         mPreview = findViewById<View>(R.id.preview) as CameraSourcePreview
         mGraphicOverlay = findViewById<View>(R.id.faceOverlay) as GraphicOverlay
 
@@ -225,11 +225,11 @@ class TimerActivity : AppCompatActivity() {
         var ref =FirebaseDatabase.getInstance().getReference("/calendar/$uid/$date/result")
         ref.setValue(timer)
 
-        study1.endTime="$hour:$minute"
+        study1.endTime=String.format("%2d:%2d",hour,minute)
 
         if(flag)
         {
-            realStudy1.realStudyEndTime = "$hour:$minute"
+            realStudy1.realStudyEndTime = String.format("%2d:%2d",hour,minute)
             val tmp = RealStudy(realStudy1.realStudyStartTime,realStudy1.realStudyEndTime)
             val fstudyTime = focusStudy.base-SystemClock.elapsedRealtime()
             focusStudy.stop()
@@ -314,7 +314,7 @@ class TimerActivity : AppCompatActivity() {
                                     calendar = Calendar.getInstance()
                                     val hour = calendar.get(Calendar.HOUR_OF_DAY)
                                     val minute = calendar.get(Calendar.MINUTE)
-                                    realStudy1.realStudyEndTime ="$hour:$minute"
+                                    realStudy1.realStudyEndTime =String.format("%2d:%2d",hour,minute)
                                     val tmp = RealStudy(realStudy1.realStudyStartTime,realStudy1.realStudyEndTime)
                                     val fstudyTime = focusStudy.base-SystemClock.elapsedRealtime()
                                     focusStudy.stop()
@@ -342,7 +342,7 @@ class TimerActivity : AppCompatActivity() {
                             calendar = Calendar.getInstance()
                             starthour = calendar.get(Calendar.HOUR_OF_DAY)
                             startminute = calendar.get(Calendar.MINUTE)
-                            realStudy1.realStudyStartTime ="$starthour:$startminute"
+                            realStudy1.realStudyStartTime =String.format("%2d:%2d",starthour,startminute)
 
                         }else{
                             noStudy.base = SystemClock.elapsedRealtime()+0
@@ -371,7 +371,7 @@ class TimerActivity : AppCompatActivity() {
                                 calendar = Calendar.getInstance()
                                 val hour = calendar.get(Calendar.HOUR_OF_DAY)
                                 val minute = calendar.get(Calendar.MINUTE)
-                                realStudy1.realStudyEndTime ="$hour:$minute"
+                                realStudy1.realStudyEndTime =String.format("%2d:%2d",hour,minute)
                                 val tmp = RealStudy(realStudy1.realStudyStartTime,realStudy1.realStudyEndTime)
                                 study1.realStudy?.add(tmp)
                                 val fstudyTime = focusStudy.base-SystemClock.elapsedRealtime()
@@ -382,7 +382,7 @@ class TimerActivity : AppCompatActivity() {
                                 }
                                 if(fstudyTime<(-300000))
                                 {
-                                    study1.realStudy?.add(tmp)
+                                    study1.realStudy?.add(tmp)          ///////////////////////////////////////////////////////////////
                                 }
                             }
                         }
