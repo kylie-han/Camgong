@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.example.myapplication.PageAdapterInner
 import com.example.myapplication.R
 import com.example.myapplication.models.DailyGoal
 import com.example.myapplication.models.Result
@@ -17,7 +16,6 @@ import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.PercentFormatter
 import com.github.mikephil.charting.utils.MPPointF
-import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -32,8 +30,10 @@ import kotlin.collections.ArrayList
 class FragmentTabCalendar : Fragment() {
     private val tabTextList = arrayListOf("일간", "주간", "월간")
     // 주, 월의 공부시간 정보 저장할 배열, 총시간 / 실제 공부시간 / 최대 집중시간 / 휴식시간
-    var monthInfo = mutableListOf<Long>(0,0,0,0)
-    var weekInfo = mutableListOf<Long>(0,0,0,0)
+    var dailyInfo = mutableListOf<Long>(0,0,0,0)
+    var monthlyInfo = mutableListOf<Long>(0,0,0,0)
+    var weeklyInfo = mutableListOf<Long>(0,0,0,0)
+    var weekOfMonth = CalendarDay.today()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,43 +48,51 @@ class FragmentTabCalendar : Fragment() {
         isAchived(view, CalendarDay.today())
 
         // 일, 주, 월 공부시간 정보 출력
+        getweeklyInfo(view, CalendarDay.today())
+        getmonthlyInfo(view, CalendarDay.today())
         getDayInfo(view, CalendarDay.today())
-        getWeekInfo(view, CalendarDay.today())
-        getMonthInfo(view, CalendarDay.today())
 
+        // 일,주,월 버튼 클릭 이벤트
+        view.btnDaily.setOnClickListener {
+            displayDaily(view)
+        }
+        view.btnWeekly.setOnClickListener{
+            for (i in 0..2)
+                weeklyInfo[i] = 0
+            getweeklyInfo(view, weekOfMonth)
+        }
+        view.btnMonthly.setOnClickListener{
+            displayMonthly(view)
+        }
 
-        // 선택 날짜 변경 리스너
+        // 선택된 날짜가 변경 리스너
         view.calendar.setOnDateChangedListener(object : OnDateSelectedListener{
             override fun onDateSelected(widget: MaterialCalendarView, date: CalendarDay, selected: Boolean) {
-
                 // 파이어베이스에서 값 불러와서 textView에 표시 + 비율을 받아서 차트 그리기
-                getDayInfo(view, date)
-
+                weekOfMonth = date
                 for (i in 0..2)
-                    weekInfo[i] = 0
-
-                getWeekInfo(view, date)
+                    dailyInfo[i] = 0
+                getDayInfo(view, date)
             }
         })// end of setOnDateChangedListener
 
-        // 캘린더 월 변경 리스너
+        // 캘린더 월 변경 리스너 -> isAchived() 호출
         view.calendar.setOnMonthChangedListener(object : OnMonthChangedListener{
             override fun onMonthChanged(widget: MaterialCalendarView, date: CalendarDay) { // 달이 변경되었을때
                 isAchived(view, date) // 목표 달성여부 달력에 표시
 
                 // 달이 바뀌면 일, 주별 출력정보 + 차트는 초기화 시킴
                 for (i in 0..2){
-                    weekInfo[i] = 0
-                    monthInfo[i] = 0
+                    dailyInfo[i] = 0
+                    weeklyInfo[i] = 0
+                    monthlyInfo[i] = 0
                 }
-                // 일간, 주간 차트 초기화
-//              drawDayPieChart(view, 0, 0)
-              drawWeekPieChart(view, 0, 0)
 
-                getMonthInfo(view, date) // 해당 월의 공부정보 가져옴
+                getmonthlyInfo(view, date) // 해당 월의 공부정보 가져옴
             }
         })// end of setOnMonthChangedListener
-        innerInit(view)
+
+        displayDaily(view)
         return view
     }
 
@@ -124,42 +132,12 @@ class FragmentTabCalendar : Fragment() {
     }
 
     // 일별공부비율과 휴식비율을 받아서 차트를 만듦
-//    private fun drawDayPieChart(view: View, realTime: Long, breakTime: Long) {
-//        val pieChart = view.piechart
-//        val time = ArrayList<PieEntry>()
-//        val listColors = ArrayList<Int>()
-//
-//        // 여기 value에 데이터 값 넣어주세요
-//        time.add(PieEntry(realTime.toFloat(), "공부"))
-//        listColors.add(resources.getColor(R.color.btnBackColor))
-//        time.add(PieEntry(breakTime.toFloat(), "휴식"))
-//        listColors.add(resources.getColor(R.color.cancelBtnBackColor))
-//
-//        val dataSet = PieDataSet(time, "");
-//        dataSet.colors = listColors
-//        dataSet.setDrawIcons(false)
-//        dataSet.sliceSpace = 3f
-//        dataSet.iconsOffset = MPPointF(0F, 40F)
-//        dataSet.selectionShift = 5f
-//        dataSet.valueFormatter = PercentFormatter(pieChart)
-//
-//        val pieData = PieData(dataSet)
-//        pieData.setValueTextSize(17f)
-//        pieChart.data = pieData
-//        pieChart.setUsePercentValues(true)
-//        pieChart.highlightValues(null)
-//        pieChart.invalidate()
-//        pieChart.description.isEnabled = false
-//        pieChart.animateXY(1000, 1000);
-//    }
-
-    // 주별 공부비율과 휴식비율을 받아서 차트를 만듦
-    private fun drawWeekPieChart(view: View, realTime: Long, breakTime: Long) {
+    private fun drawPieChart(view: View, realTime: Long, breakTime: Long) {
         val pieChart = view.piechart
         val time = ArrayList<PieEntry>()
         val listColors = ArrayList<Int>()
 
-        // 여기 value에 데이터 값 넣어주세요
+// 여기 value에 데이터 값 넣어주세요
         time.add(PieEntry(realTime.toFloat(), "공부"))
         listColors.add(resources.getColor(R.color.btnBackColor))
         time.add(PieEntry(breakTime.toFloat(), "휴식"))
@@ -180,39 +158,8 @@ class FragmentTabCalendar : Fragment() {
         pieChart.highlightValues(null)
         pieChart.invalidate()
         pieChart.description.isEnabled = false
-        pieChart.setRotationEnabled(false)
         pieChart.animateXY(1000, 1000);
     }
-
-    // 월별공부비율과 휴식비율을 받아서 차트를 만듦
-//    private fun drawMonthPieChart(view: View, realTime: Long, breakTime: Long) {
-//        val pieChart = view.piechart
-//        val time = ArrayList<PieEntry>()
-//        val listColors = ArrayList<Int>()
-//
-//        // 여기 value에 데이터 값 넣어주세요
-//        time.add(PieEntry(realTime.toFloat(), "공부"))
-//        listColors.add(resources.getColor(R.color.btnBackColor))
-//        time.add(PieEntry(breakTime.toFloat(), "휴식"))
-//        listColors.add(resources.getColor(R.color.cancelBtnBackColor))
-//
-//        val dataSet = PieDataSet(time, "");
-//        dataSet.colors = listColors
-//        dataSet.setDrawIcons(false)
-//        dataSet.sliceSpace = 3f
-//        dataSet.iconsOffset = MPPointF(0F, 40F)
-//        dataSet.selectionShift = 5f
-//        dataSet.valueFormatter = PercentFormatter(pieChart)
-//
-//        val pieData = PieData(dataSet)
-//        pieData.setValueTextSize(17f)
-//        pieChart.data = pieData
-//        pieChart.setUsePercentValues(true)
-//        pieChart.highlightValues(null)
-//        pieChart.invalidate()
-//        pieChart.description.isEnabled = false
-//        pieChart.animateXY(1000, 1000);
-//    }
 
     // 1일 공부정보 가져옴
     fun getDayInfo(view: View, calendarDay: CalendarDay) {
@@ -221,7 +168,7 @@ class FragmentTabCalendar : Fragment() {
         val ref = FirebaseDatabase.getInstance().getReference("/calendar/$uid/$date/result")
 
         ref.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
+            override fun onDataChange(snapshot: DataSnapshot){
                 // result부분 가져오기
                 if(snapshot.key.equals("result")){
                     // DB에서 해당 값 가져오기, Result 클래스에 맞게 자동으로 저장됨
@@ -231,23 +178,17 @@ class FragmentTabCalendar : Fragment() {
                         val tc = TimeCalculator()
 
                         // 총 공부시간, 실제 공부시간, 최대집중시간, 휴식시간
-                        val totalTime = data.totalStudyTime
-                        val realTime = data.realStudyTime
-                        val focusTime = data.maxFocusStudyTime
-                        val breakTime = totalTime - realTime
+                        dailyInfo[0] = data.totalStudyTime
+                        dailyInfo[1] = data.realStudyTime
+                        dailyInfo[2] = data.maxFocusStudyTime
+                        dailyInfo[3] = data.totalStudyTime - data.realStudyTime
 
-                        // 값 출력
-                        var str = "총 공부시간: ${tc.msToStringTime(totalTime)}\n"
-                        str += "실제 공부시간: ${tc.msToStringTime(realTime)}\n"
-                        str += "최대 집중 시간: ${tc.msToStringTime(focusTime)}\n"
-                        str += "휴식시간: ${tc.msToStringTime(breakTime)}\n"
-
-
-                        // 휴식, 공부 비율 그래프로 출력
-//                        drawDayPieChart(view, realTime, breakTime)
                     }else{ // 정보가 없을경우 모든 값을 없음으로 처리
                     }
                 }// end of outer if()
+
+                // 휴식, 공부 비율 그래프로 출력
+                displayDaily(view)
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -258,8 +199,33 @@ class FragmentTabCalendar : Fragment() {
 
     } // end of getDate()
 
+    private fun displayDefault(view:View){
+        drawPieChart(view, 0, 100)
+        view.msg1.text = "정"
+        view.msg2.text = "보"
+        view.msg3.text = "가"
+        view.msg4.text = "없"
+        view.msg5.text = "다"
+    }
+
+    private fun displayDaily(view: View) {
+        if(dailyInfo[0] == 0L){
+            displayDefault(view)
+        }else{
+            val tc = TimeCalculator()
+            dailyInfo[3] = dailyInfo[0] - dailyInfo[1]
+            drawPieChart(view, dailyInfo[1], dailyInfo[3])
+            view.msg1.text = "총 공부 시간: ${tc.msToStringTime(dailyInfo[0])}"
+            view.msg2.text = "실제 공부 시간: ${tc.msToStringTime(dailyInfo[1])}"
+            view.msg3.text = "최대 집중시간: ${tc.msToStringTime(dailyInfo[2])}"
+            view.msg4.text = "휴식시간 : ${tc.msToStringTime(dailyInfo[3])}"
+            view.msg5.text = "공부 비율 : ${tc.getPercent(dailyInfo[1], dailyInfo[0])}%"
+            view.msg6.text = "휴식 비율: ${tc.getPercent(dailyInfo[3], dailyInfo[0])}%"
+        }
+    }
+
     // 주별 확인
-    private fun getWeekInfo(view: View, calendarDay: CalendarDay) {
+    private fun getweeklyInfo(view: View, calendarDay: CalendarDay) {
         val uid = FirebaseAuth.getInstance().uid
         val ins = FirebaseDatabase.getInstance()
 
@@ -276,28 +242,28 @@ class FragmentTabCalendar : Fragment() {
             7 -> day -= 6
             else -> null
         }
+
         for (i in day .. day+6){
             var date = month
             if(i<10) date += "0$i"
             else date += "$i"
             var ref = ins.getReference("/calendar/$uid/$date/result")
 
-            ref.addValueEventListener(object : ValueEventListener{
+            ref.addListenerForSingleValueEvent(object :ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if(snapshot.key.equals("result")){
                         val data = snapshot.getValue(Result::class.java)
                         if(data != null){
-                            weekInfo[0] += data.totalStudyTime
-                            weekInfo[1] += data.realStudyTime
-                            weekInfo[2] += data.maxFocusStudyTime
-                            weekInfo[3] += data.totalStudyTime - data.realStudyTime
-//                            displayWeek(view)
+                            weeklyInfo[0] += data.totalStudyTime
+                            weeklyInfo[1] += data.realStudyTime
+                            weeklyInfo[2] += data.maxFocusStudyTime
+                            weeklyInfo[3] += data.totalStudyTime - data.realStudyTime
                         }else{
-//                            displayWeek(view)
                         }
                     }
-                    if(i == day+6)
-                        displayWeek(view)
+                    if(i == day+6){
+                        displayWeekly(view)
+                    }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -306,29 +272,30 @@ class FragmentTabCalendar : Fragment() {
 
             })// end of ref
 
-        }// end of for
+        }
 
-    }// end of getWeekInfo()
+    }// end of getweeklyInfo()
 
     // 1주일의 공부 정보 View에 표시
-    private fun displayWeek(view: View) {
-        if(weekInfo[0] == 0L) {
-            drawWeekPieChart(view, 0, 100)
+    private fun displayWeekly(view: View) {
+        if(weeklyInfo[0] == 0L) {
+            displayDefault(view)
         }
         else{
             val tc = TimeCalculator()
-            weekInfo[3] = weekInfo[0] - weekInfo[1]
-            var str = "총 시간: ${tc.msToStringTime(weekInfo[0])}\n"
-            str += "실제 시간: ${tc.msToStringTime(weekInfo[1])}\n"
-            str += "최대 집중시간: ${tc.msToStringTime(weekInfo[2])}\n"
-            str += "휴식 시간: ${tc.msToStringTime(weekInfo[3])}\n"
-
-            drawWeekPieChart(view, weekInfo[1], weekInfo[3])
+            weeklyInfo[3] = weeklyInfo[0] - weeklyInfo[1]
+            drawPieChart(view, weeklyInfo[1], weeklyInfo[3])
+            view.msg1.text = "총 시간: ${tc.msToStringTime(weeklyInfo[0])}"
+            view.msg2.text = "실제 시간: ${tc.msToStringTime(weeklyInfo[1])}"
+            view.msg3.text = "최대 집중시간: ${tc.msToStringTime(weeklyInfo[2])}"
+            view.msg4.text = "휴식 시간: ${tc.msToStringTime(weeklyInfo[3])}"
+            view.msg5.text = "공부 비율 : ${tc.getPercent(weeklyInfo[1], weeklyInfo[0])}%"
+            view.msg6.text = "휴식 비율: ${tc.getPercent(weeklyInfo[3], weeklyInfo[0])}%"
         }
     }
 
     // 1달의 공부 정보를 가져와서 표시
-    private fun getMonthInfo(view: View, current: CalendarDay) {
+    private fun getmonthlyInfo(view: View, current: CalendarDay) {
         val uid = FirebaseAuth.getInstance().uid
         val ins = FirebaseDatabase.getInstance()
         val month = getStringDate(current)
@@ -340,23 +307,21 @@ class FragmentTabCalendar : Fragment() {
             else date += "$i"
             var ref = ins.getReference("/calendar/$uid/$date/result")
 
-            ref.addValueEventListener(object : ValueEventListener{
+            ref.addListenerForSingleValueEvent(object :ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if(snapshot.key.equals("result")){
                         val data = snapshot.getValue(Result::class.java)
 
                         if(data != null){
-                            monthInfo[0] += data.totalStudyTime
-                            monthInfo[2] += data.maxFocusStudyTime
-                            monthInfo[1] += data.realStudyTime
-                            monthInfo[3] += data.totalStudyTime - data.realStudyTime
-//                            displayMonth(view)
+                            monthlyInfo[0] += data.totalStudyTime
+                            monthlyInfo[2] += data.maxFocusStudyTime
+                            monthlyInfo[1] += data.realStudyTime
+                            monthlyInfo[3] += data.totalStudyTime - data.realStudyTime
                         }else{
-//                            displayMonth(view)
                         }
                     }
-                    if(i==31){
-                        displayMonth(view)
+                    if(i == 31){
+                        displayMonthly(view)
                     }
                 }// end of onDataChange
 
@@ -365,22 +330,24 @@ class FragmentTabCalendar : Fragment() {
                 }
             })
         }// end of for
-    }// end of getMonthInfo()
+    }// end of getmonthlyInfo()
 
     // 1달의 공부 정보 View에 표시
-    private fun displayMonth(view: View) {
-        if(monthInfo[0] == 0L) {
-//            drawMonthPieChart(view, 0, 100)
+    private fun displayMonthly(view: View) {
+        if(monthlyInfo[0] == 0L) {
+            displayDefault(view)
         }
         else{
             val tc = TimeCalculator()
-            monthInfo[3] = monthInfo[0] - monthInfo[1]
-            var str = "총 시간: ${tc.msToStringTime(monthInfo[0])}\n"
-            str += "실제 시간: ${tc.msToStringTime(monthInfo[1])}\n"
-            str += "최대 집중시간: ${tc.msToStringTime(monthInfo[2])}\n"
-            str += "휴식 시간: ${tc.msToStringTime(monthInfo[3])}\n"
+            monthlyInfo[3] = monthlyInfo[0] - monthlyInfo[1]
+            drawPieChart(view, monthlyInfo[1], monthlyInfo[3])
 
-//            drawMonthPieChart(view, monthInfo[1], monthInfo[3])
+            view.msg1.text = "총 시간: ${tc.msToStringTime(monthlyInfo[0])}\n"
+            view.msg2.text = "실제 시간: ${tc.msToStringTime(monthlyInfo[1])}\n"
+            view.msg3.text = "최대 집중시간: ${tc.msToStringTime(monthlyInfo[2])}\n"
+            view.msg4.text = "휴식 시간: ${tc.msToStringTime(monthlyInfo[3])}\n"
+            view.msg5.text = "공부 비율 : ${tc.getPercent(monthlyInfo[1], monthlyInfo[0])}%"
+            view.msg6.text = "휴식 비율: ${tc.getPercent(monthlyInfo[3], monthlyInfo[0])}%"
         }
     }
 
@@ -411,7 +378,7 @@ class FragmentTabCalendar : Fragment() {
                                 // 빨간색으로 해당날짜에 표시
                                 view.calendar.addDecorators(AchiveDecorator(day,2))
                             }
-                        }else{ // 목표가 없는 경우, 회색으로 해당날짜에 표시
+                        }else{ // 목표가 없는 경우, 회색으로 해당날짜에 표시(삭제됨)
                             view.calendar.addDecorators(AchiveDecorator(day,3))
                         }
                     }
@@ -424,12 +391,5 @@ class FragmentTabCalendar : Fragment() {
             })
         }// end of for
     } // end of isAchived()
-    private fun innerInit(view: View) {
-        view.view_pager_in.adapter = PageAdapterInner(this)
-        TabLayoutMediator(view.tab_in, view.view_pager_in) {
-                tab, position ->
-            tab.text = tabTextList[position]
-        }.attach()
-    }
 
 }
