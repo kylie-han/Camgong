@@ -80,6 +80,12 @@ class TimeCalculator {
     }
 
     // time1 / time2 * 100의 결과를 소수점 2번째 반올림한 결과 반환
+    // time1 / time2 * 100의 결과를 소수점 2번째 반올림한 결과 반환
+    fun getPercent(time1:Long, time2:Long): Double{
+        var percent = time1.toDouble() / time2 * 100
+        percent = (percent*100).roundToInt() / 100.0
 
+        return percent
+    }
 }
 
