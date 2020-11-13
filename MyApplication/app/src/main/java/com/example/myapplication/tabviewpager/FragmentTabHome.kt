@@ -108,6 +108,7 @@ class FragmentTabHome  : Fragment() {
                     .setPositiveButton("OK") {
                         FirebaseAuth.getInstance().signOut(); //로그아웃
                         startActivity(intent)
+                        getActivity()?.finish()
                     }.setNegativeButton("CANCEL") {
                         null
                     }.show()
@@ -124,6 +125,7 @@ class FragmentTabHome  : Fragment() {
                     .setPositiveButton("OK") {
                         firebaseAuth!!.getCurrentUser()?.delete() //회원탈퇴
                         startActivity(intent)
+                        getActivity()?.finish()
                     }.setNegativeButton("CANCEL") {
                         null
                     }.show()
