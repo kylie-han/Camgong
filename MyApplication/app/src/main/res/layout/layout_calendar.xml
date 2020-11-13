@@ -20,9 +20,6 @@
             android:orientation="vertical"
             android:id="@+id/relative">
 
-
-
-
             <com.prolificinteractive.materialcalendarview.MaterialCalendarView
                 android:id="@+id/calendar"
                 android:layout_width="match_parent"
@@ -43,18 +40,21 @@
                     android:id="@+id/btnDaily"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="일간" />
 
                 <Button
                     android:id="@+id/btnWeekly"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="주간" />
 
                 <Button
                     android:id="@+id/btnMonthly"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="월간" />
             </LinearLayout>
 
