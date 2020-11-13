@@ -68,6 +68,7 @@ class TimerActivity : AppCompatActivity() {
     private var studies1 : ArrayList<Study> = arrayListOf()
     private var starthour : Int = 0
     private var startminute : Int = 0
+    private var studyCnt : Int = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // 상태바 숨기기
@@ -222,6 +223,10 @@ class TimerActivity : AppCompatActivity() {
         totalStudy?.stop()
         timer.realStudyTime = chronometer.base-SystemClock.elapsedRealtime()
         timer.totalStudyTime = totalStudy.base - SystemClock.elapsedRealtime()
+        if(studyCnt==0)
+        {
+            timer.realStudyTime = lasttime
+        }
         var ref =FirebaseDatabase.getInstance().getReference("/calendar/$uid/$date/result")
         ref.setValue(timer)
 
@@ -304,7 +309,7 @@ class TimerActivity : AppCompatActivity() {
                                 noStudy.base = SystemClock.elapsedRealtime()+0
                                 noStudy.start()
                                 noFlag = false
-                            }else if((-60000)>(noStudy.base-SystemClock.elapsedRealtime()))
+                            }else if((-6000)>(noStudy.base-SystemClock.elapsedRealtime()))
                             {
                                 if(flag)
                                 {
@@ -331,6 +336,7 @@ class TimerActivity : AppCompatActivity() {
                         }
                         else if(!flag){
                             // 안 자고 있는데 그 전에 공부 안 하는 중이 카운트 됐었음
+                            studyCnt++
                             chronometer.base = SystemClock.elapsedRealtime()+lasttime
                             focusStudy.base =SystemClock.elapsedRealtime()+0
                             noStudy.base =SystemClock.elapsedRealtime()+0
@@ -361,7 +367,7 @@ class TimerActivity : AppCompatActivity() {
                             noStudy.base = SystemClock.elapsedRealtime()+0
                             noStudy.start()
                             noFlag = false
-                        }else if((-60000)>(noStudy.base-SystemClock.elapsedRealtime()))
+                        }else if((-6000)>(noStudy.base-SystemClock.elapsedRealtime()))
                         {
                             if(flag)
                             {
