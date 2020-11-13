@@ -5,6 +5,7 @@ import android.app.DatePickerDialog
 import android.app.DatePickerDialog.OnDateSetListener
 import android.content.Intent
 import android.graphics.Color
+import android.opengl.Visibility
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
@@ -42,6 +43,7 @@ class FragmentTabStats : Fragment() {
     val year = calendar.get(Calendar.YEAR)
     val month = calendar.get(Calendar.MONTH) + 1
     val date = calendar.get(Calendar.DATE)
+    val today = TimeCalculator().today()
     var resultValueEventListener: ValueEventListener? = null
     var dailyGoalValueEventListener: ValueEventListener? = null
     var studiesValueEventListener: ValueEventListener? = null
@@ -115,7 +117,8 @@ class FragmentTabStats : Fragment() {
             dailyGoalValueEventListener!!
         )
         if (studiesValueEventListener != null) myRef.removeEventListener(studiesValueEventListener!!)
-
+        if (btn_setting_goal != null && day == today ) btn_setting_goal.visibility = View.VISIBLE
+        else if(btn_setting_goal != null && day != today) btn_setting_goal.visibility = View.INVISIBLE
         // [START read_message]
 
         resultValueEventListener =
