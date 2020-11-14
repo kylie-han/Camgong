@@ -377,8 +377,14 @@ class FragmentTabStats : Fragment() {
                             maxValue3 = array[i]
                         }
                     }
-                    if (maxValue1 != 0) recommendTime1.text = "${max1}시~${max1 + 1}시"
-                    else recommendTime1.text = "이전 기록이 없습니다"
+                    if (maxValue1 != 0) {
+                        recommendTime1.textSize = 24F
+                        recommendTime1.text = "${max1}시~${max1 + 1}시"
+                    }
+                    else {
+                        recommendTime1.textSize = 18F
+                        recommendTime1.text = "기록이 없습니다"
+                    }
                     if (maxValue2 != 0) recommendTime2.text = "${max2}시~${max2 + 1}시"
                     else recommendTime2.text = " "
                     if (maxValue3 != 0) recommendTime3.text = "${max3}시~${max3 + 1}시"
