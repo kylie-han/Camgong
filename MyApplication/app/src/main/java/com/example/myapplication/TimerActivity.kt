@@ -68,6 +68,7 @@ class TimerActivity : AppCompatActivity() {
     private var studies1 : ArrayList<Study> = arrayListOf()
     private var starthour : Int = 0
     private var startminute : Int = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // 상태바 숨기기
@@ -222,6 +223,10 @@ class TimerActivity : AppCompatActivity() {
         totalStudy?.stop()
         timer.realStudyTime = chronometer.base-SystemClock.elapsedRealtime()
         timer.totalStudyTime = totalStudy.base - SystemClock.elapsedRealtime()
+        if(!flag)
+        {
+            timer.realStudyTime = lasttime
+        }
         var ref =FirebaseDatabase.getInstance().getReference("/calendar/$uid/$date/result")
         ref.setValue(timer)
 
