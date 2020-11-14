@@ -31,13 +31,16 @@ class FragmentTabHome  : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
+        val username = FirebaseAuth.getInstance().currentUser
+        val name = username?.displayName
         val view =inflater.inflate(R.layout.layout_home, container, false)
         val calendar = Calendar.getInstance()
         val year = calendar.get(Calendar.YEAR)
         val month = calendar.get(Calendar.MONTH) +1
         val day = calendar.get(Calendar.DATE)
         view.homeDate.text = "$year.$month.$day"
+        view.user.setText(name)
+
         var date = "$year"
         if(month<10)
         {
