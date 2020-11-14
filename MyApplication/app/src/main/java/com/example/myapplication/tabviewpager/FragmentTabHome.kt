@@ -122,18 +122,24 @@ class FragmentTabHome  : Fragment() {
 
         view.delAcc.setOnClickListener {
             val intent = Intent(context, LoginActivity::class.java)
+            val UID =firebaseAuth!!.getCurrentUser()?.uid
+            val database = FirebaseDatabase.getInstance().reference
             context?.let { it1 ->
                 CustomDialog(it1)
                     .setMessage("탈퇴하시겠습니까?")
                     .setPositiveButton("OK") {
-                        firebaseAuth!!.getCurrentUser()?.delete() //회원탈퇴
                         startActivity(intent)
                         getActivity()?.finish()
+                        if (UID != null) {
+                            FirebaseAuth.getInstance().signOut();
+                            database.child("users").child(UID).removeValue()
+                            firebaseAuth!!.getCurrentUser()?.delete() //회원탈퇴
+                        }
+
                     }.setNegativeButton("CANCEL") {
                         null
                     }.show()
             }
-
 
         }
 
