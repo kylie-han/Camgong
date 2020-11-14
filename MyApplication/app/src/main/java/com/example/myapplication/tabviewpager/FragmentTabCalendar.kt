@@ -3,14 +3,19 @@ package com.example.myapplication.tabviewpager
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
+import android.view.View.OnTouchListener
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.myapplication.R
 import com.example.myapplication.models.DailyGoal
 import com.example.myapplication.models.Result
-import com.example.myapplication.util.*
+import com.example.myapplication.util.AchiveDecorator
+import com.example.myapplication.util.SaturdayDecorator
+import com.example.myapplication.util.SundayDecorator
+import com.example.myapplication.util.TimeCalculator
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
@@ -30,9 +35,9 @@ import kotlin.collections.ArrayList
 class FragmentTabCalendar : Fragment() {
     private val tabTextList = arrayListOf("일간", "주간", "월간")
     // 주, 월의 공부시간 정보 저장할 배열, 총시간 / 실제 공부시간 / 최대 집중시간 / 휴식시간
-    var dailyInfo = mutableListOf<Long>(0,0,0,0)
-    var monthlyInfo = mutableListOf<Long>(0,0,0,0)
-    var weeklyInfo = mutableListOf<Long>(0,0,0,0)
+    var dailyInfo = mutableListOf<Long>(0, 0, 0, 0)
+    var monthlyInfo = mutableListOf<Long>(0, 0, 0, 0)
+    var weeklyInfo = mutableListOf<Long>(0, 0, 0, 0)
     var weekOfMonth = CalendarDay.today()
 
     override fun onCreateView(
@@ -55,19 +60,29 @@ class FragmentTabCalendar : Fragment() {
         // 일,주,월 버튼 클릭 이벤트
         view.btnDaily.setOnClickListener {
             displayDaily(view)
+            initBtn(view)
+            view.btnDaily.setBackground(resources.getDrawable(R.drawable.button_custom))
         }
         view.btnWeekly.setOnClickListener{
             for (i in 0..2)
                 weeklyInfo[i] = 0
             getweeklyInfo(view, weekOfMonth)
+            initBtn(view)
+            view.btnWeekly.setBackground(resources.getDrawable(R.drawable.button_custom))
         }
         view.btnMonthly.setOnClickListener{
             displayMonthly(view)
+            initBtn(view)
+            view.btnMonthly.setBackground(resources.getDrawable(R.drawable.button_custom))
         }
 
         // 선택된 날짜가 변경 리스너
-        view.calendar.setOnDateChangedListener(object : OnDateSelectedListener{
-            override fun onDateSelected(widget: MaterialCalendarView, date: CalendarDay, selected: Boolean) {
+        view.calendar.setOnDateChangedListener(object : OnDateSelectedListener {
+            override fun onDateSelected(
+                widget: MaterialCalendarView,
+                date: CalendarDay,
+                selected: Boolean
+            ) {
                 // 파이어베이스에서 값 불러와서 textView에 표시 + 비율을 받아서 차트 그리기
                 weekOfMonth = date
                 for (i in 0..2)
@@ -77,12 +92,15 @@ class FragmentTabCalendar : Fragment() {
         })// end of setOnDateChangedListener
 
         // 캘린더 월 변경 리스너 -> isAchived() 호출
-        view.calendar.setOnMonthChangedListener(object : OnMonthChangedListener{
-            override fun onMonthChanged(widget: MaterialCalendarView, date: CalendarDay) { // 달이 변경되었을때
+        view.calendar.setOnMonthChangedListener(object : OnMonthChangedListener {
+            override fun onMonthChanged(
+                widget: MaterialCalendarView,
+                date: CalendarDay
+            ) { // 달이 변경되었을때
                 isAchived(view, date) // 목표 달성여부 달력에 표시
 
                 // 달이 바뀌면 일, 주별 출력정보 + 차트는 초기화 시킴
-                for (i in 0..2){
+                for (i in 0..2) {
                     dailyInfo[i] = 0
                     weeklyInfo[i] = 0
                     monthlyInfo[i] = 0
@@ -96,6 +114,12 @@ class FragmentTabCalendar : Fragment() {
         return view
     }
 
+    private fun initBtn(view: View) {
+        view.btnDaily.setBackground(resources.getDrawable(R.drawable.button_custom2))
+        view.btnWeekly.setBackground(resources.getDrawable(R.drawable.button_custom2))
+        view.btnMonthly.setBackground(resources.getDrawable(R.drawable.button_custom2))
+    }
+
     private fun initCalendar(view: View) {
         // 캘린더 선택설정
         view.calendar.selectionMode = MaterialCalendarView.SELECTION_MODE_SINGLE
@@ -103,8 +127,8 @@ class FragmentTabCalendar : Fragment() {
         // 캘린더 기본설정
         view.calendar.state().edit()
             .setFirstDayOfWeek(Calendar.SUNDAY)
-            .setMinimumDate(CalendarDay.from(2000,0,1))
-            .setMaximumDate(CalendarDay.from(2100,11,31))
+            .setMinimumDate(CalendarDay.from(2000, 0, 1))
+            .setMaximumDate(CalendarDay.from(2100, 11, 31))
             .setCalendarDisplayMode(CalendarMode.MONTHS)
             .commit()
 
@@ -169,13 +193,13 @@ class FragmentTabCalendar : Fragment() {
         val ref = FirebaseDatabase.getInstance().getReference("/calendar/$uid/$date/result")
 
         ref.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot){
+            override fun onDataChange(snapshot: DataSnapshot) {
                 // result부분 가져오기
-                if(snapshot.key.equals("result")){
+                if (snapshot.key.equals("result")) {
                     // DB에서 해당 값 가져오기, Result 클래스에 맞게 자동으로 저장됨
                     val data = snapshot.getValue(Result::class.java)
 
-                    if(data != null){
+                    if (data != null) {
                         val tc = TimeCalculator()
 
                         // 총 공부시간, 실제 공부시간, 최대집중시간, 휴식시간
@@ -184,7 +208,7 @@ class FragmentTabCalendar : Fragment() {
                         dailyInfo[2] = data.maxFocusStudyTime
                         dailyInfo[3] = data.totalStudyTime - data.realStudyTime
 
-                    }else{ // 정보가 없을경우 모든 값을 없음으로 처리
+                    } else { // 정보가 없을경우 모든 값을 없음으로 처리
                     }
                 }// end of outer if()
 
@@ -200,7 +224,7 @@ class FragmentTabCalendar : Fragment() {
 
     } // end of getDate()
 
-    private fun displayDefault(view:View){
+    private fun displayDefault(view: View){
         drawPieChart(view, 0, 100)
         view.msg1.text = "데이터가 존재하지 않습니다!"
         view.msg2.text = ""
@@ -259,19 +283,19 @@ class FragmentTabCalendar : Fragment() {
             else date += "$i"
             var ref = ins.getReference("/calendar/$uid/$date/result")
 
-            ref.addListenerForSingleValueEvent(object :ValueEventListener{
+            ref.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    if(snapshot.key.equals("result")){
+                    if (snapshot.key.equals("result")) {
                         val data = snapshot.getValue(Result::class.java)
-                        if(data != null){
+                        if (data != null) {
                             weeklyInfo[0] += data.totalStudyTime
                             weeklyInfo[1] += data.realStudyTime
                             weeklyInfo[2] += data.maxFocusStudyTime
                             weeklyInfo[3] += data.totalStudyTime - data.realStudyTime
-                        }else{
+                        } else {
                         }
                     }
-                    if(i == day+6){
+                    if (i == day + 6) {
                         displayWeekly(view)
                     }
                 }
@@ -323,20 +347,20 @@ class FragmentTabCalendar : Fragment() {
             else date += "$i"
             var ref = ins.getReference("/calendar/$uid/$date/result")
 
-            ref.addListenerForSingleValueEvent(object :ValueEventListener{
+            ref.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    if(snapshot.key.equals("result")){
+                    if (snapshot.key.equals("result")) {
                         val data = snapshot.getValue(Result::class.java)
 
-                        if(data != null){
+                        if (data != null) {
                             monthlyInfo[0] += data.totalStudyTime
                             monthlyInfo[2] += data.maxFocusStudyTime
                             monthlyInfo[1] += data.realStudyTime
                             monthlyInfo[3] += data.totalStudyTime - data.realStudyTime
-                        }else{
+                        } else {
                         }
                     }
-                    if(i == 31){
+                    if (i == 31) {
                         displayMonthly(view)
                     }
                 }// end of onDataChange
@@ -387,21 +411,21 @@ class FragmentTabCalendar : Fragment() {
             var ref = ins.getReference("/calendar/$uid/$date/dailyGoal")
             val day = CalendarDay.from(current.year, current.month, i) // 현재 조회중인 날짜
 
-            ref.addListenerForSingleValueEvent(object : ValueEventListener{
+            ref.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    if(snapshot.key.equals("dailyGoal")){
+                    if (snapshot.key.equals("dailyGoal")) {
                         val data = snapshot.getValue(DailyGoal::class.java)
                         var str = "기본값"
-                        if(data != null){ // 목표가 설정되어있을경우
-                            if(data.goalStatus){ // 달성한 경우
+                        if (data != null) { // 목표가 설정되어있을경우
+                            if (data.goalStatus) { // 달성한 경우
                                 // 파란색으로 해당날짜에 표시
-                                view.calendar.addDecorators(AchiveDecorator(day,1))
-                            }else{ // 달성 못한 경우
+                                view.calendar.addDecorators(AchiveDecorator(day, 1))
+                            } else { // 달성 못한 경우
                                 // 빨간색으로 해당날짜에 표시
-                                view.calendar.addDecorators(AchiveDecorator(day,2))
+                                view.calendar.addDecorators(AchiveDecorator(day, 2))
                             }
-                        }else{ // 목표가 없는 경우, 회색으로 해당날짜에 표시(삭제됨)
-                            view.calendar.addDecorators(AchiveDecorator(day,3))
+                        } else { // 목표가 없는 경우, 회색으로 해당날짜에 표시(삭제됨)
+                            view.calendar.addDecorators(AchiveDecorator(day, 3))
                         }
                     }
                 }

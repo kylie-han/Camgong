@@ -55,7 +55,7 @@
                     android:layout_marginLeft="1dp"
                     android:layout_marginRight="1dp"
                     android:layout_weight="1"
-                    android:background="@drawable/button_custom"
+                    android:background="@drawable/button_custom2"
                     android:text="주간"
                     android:textColor="@color/white"
                     android:textStyle="bold" />
@@ -67,7 +67,7 @@
                     android:layout_marginLeft="1dp"
                     android:layout_marginRight="2dp"
                     android:layout_weight="1"
-                    android:background="@drawable/button_custom"
+                    android:background="@drawable/button_custom2"
                     android:text="월간"
                     android:textColor="@color/white"
                     android:textStyle="bold" />
