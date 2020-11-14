@@ -58,11 +58,10 @@ class TimeCalculator {
     fun msToStringTime(milliSec: Long): String{
         val ms = abs(milliSec)
         return String.format(
-            "%02d:%02d:%02d.%03d",
+            "%02d:%02d:%02d",
             ms / (60*60*1000),
             ms % (60*60*1000) / (60*1000),
-            ms % (60*1000) / 1000,
-            ms % 1000
+            ms % (60*1000) / 1000
         )
     }
     fun stringToLong(time: String):Long{
