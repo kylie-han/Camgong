@@ -45,7 +45,7 @@ public class AchiveDecorator(val date:CalendarDay, val type:Int) : DayViewDecora
     override fun decorate(view: DayViewFacade) {
         var color = Color.WHITE
         when(type){
-            1 -> color = Color.BLUE
+            1 -> color = Color.rgb(0, 212, 239)
             2 -> color = Color.RED
             3 -> color = Color.LTGRAY
         }
