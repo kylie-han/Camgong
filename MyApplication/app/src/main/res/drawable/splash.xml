@@ -6,9 +6,12 @@
         android:drawable="@color/white"/>
     <item>
         <bitmap
-            android:gravity="center"
-            android:scaleType="fitCenter"
-            android:src="@drawable/splash_img_foreground"/>
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY"
+            android:adjustViewBounds="true"
+            android:src="@drawable/splash_img"/>
     </item>
 
 </layer-list>
