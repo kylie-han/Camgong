@@ -251,10 +251,10 @@ class FragmentTabCalendar : Fragment() {
             view.msg2.text = "실제 공부 시간"
             view.msg3.text = "최대 집중시간"
             view.msg4.text = "휴식시간"
-            view.result1.text = "${tc.msToStringTime(dailyInfo[0])}"
-            view.result2.text = "${tc.msToStringTime(dailyInfo[1])}"
-            view.result3.text = "${tc.msToStringTime(dailyInfo[2])}"
-            view.result4.text = "${tc.msToStringTime(dailyInfo[3])}"
+            view.result1.text = "${tc.msToStringTime(dailyInfo[0])}\n"
+            view.result2.text = "${tc.msToStringTime(dailyInfo[1])}\n"
+            view.result3.text = "${tc.msToStringTime(dailyInfo[2])}\n"
+            view.result4.text = "${tc.msToStringTime(dailyInfo[3])}\n"
         }
     }
 
@@ -327,10 +327,10 @@ class FragmentTabCalendar : Fragment() {
             view.msg2.text = "실제 공부 시간"
             view.msg3.text = "최대 집중시간"
             view.msg4.text = "휴식시간"
-            view.result1.text = "${tc.msToStringTime(weeklyInfo[0])}"
-            view.result2.text = "${tc.msToStringTime(weeklyInfo[1])}"
-            view.result3.text = "${tc.msToStringTime(weeklyInfo[2])}"
-            view.result4.text = "${tc.msToStringTime(weeklyInfo[3])}"
+            view.result1.text = "${tc.msToStringTime(weeklyInfo[0])}\n"
+            view.result2.text = "${tc.msToStringTime(weeklyInfo[1])}\n"
+            view.result3.text = "${tc.msToStringTime(weeklyInfo[2])}\n"
+            view.result4.text = "${tc.msToStringTime(weeklyInfo[3])}\n"
         }
     }
 
