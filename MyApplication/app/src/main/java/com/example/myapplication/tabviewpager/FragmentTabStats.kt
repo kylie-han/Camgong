@@ -272,19 +272,20 @@ class FragmentTabStats : Fragment() {
                                 val reHour = time.realStudyEndTime.substring(0, 2).toInt()
                                 val reMin = (time.realStudyEndTime.substring(3, 5).toInt() + 5) / 10
                                 if (rsHour == reHour) {
-                                    for (i in rsMin until reMin + 1) {
+                                    for (i in rsMin+1 until reMin + 1) {
                                         colorTable[rsHour][i] = "#34C7DA"
                                     }
                                 } else if (rsHour < reHour) {
-                                    for (i in rsMin until colorTable[rsHour].size) {
+                                    for (i in rsMin+1 until colorTable[rsHour].size) {
                                         colorTable[rsHour][i] = "#34C7DA"
                                     }
-                                    for (i in rsHour + 1 until reHour) {
+                                    for (i in rsHour+1 until reHour) {
                                         for (j in 1 until colorTable[rsHour].size) {
-                                            colorTable[rsHour][i] = "#34C7DA"
+                                            colorTable[rsHour][j] = "#34C7DA"
+                                            Log.d(TAG,"$rsHour , $j")
                                         }
                                     }
-                                    for (i in 1 until reMin) {
+                                    for (i in 1 until reMin+1) {
                                         colorTable[reHour][i] = "#34C7DA"
                                     }
                                 }
