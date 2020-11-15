@@ -200,21 +200,8 @@ class TimerActivity : AppCompatActivity() {
         val year = calendar.get(Calendar.YEAR)
         val month = calendar.get(Calendar.MONTH) +1
         val day = calendar.get(Calendar.DATE)
-        var date = "$year"
-        if(month<10)
-        {
-            date+="0$month"
-        }else
-        {
-            date+="$month"
-        }
-        if(day<10)
-        {
-            date+="0$day"
-        }else
-        {
-            date+="$day"
-        }
+        var date = String.format("%d%02d%02d",year,month,day)
+        Log.d("날짜",""+date)
         val hour = calendar.get(Calendar.HOUR_OF_DAY)
         val minute = calendar.get(Calendar.MINUTE)
         val uid = FirebaseAuth.getInstance().uid
@@ -292,11 +279,11 @@ class TimerActivity : AppCompatActivity() {
 
             object : Detector.Processor<Face>{
                 override fun release() {
-                    mGraphicOverlay?.clear()
+                    //mGraphicOverlay?.clear()
                 }
 
                 override fun receiveDetections(detections: Detections<Face>) {
-                    mGraphicOverlay?.clear()
+                    //mGraphicOverlay?.clear()
                     var faces = detections?.detectedItems
 
 
@@ -353,8 +340,8 @@ class TimerActivity : AppCompatActivity() {
                             noStudy.base = SystemClock.elapsedRealtime()+0
                         }
 
-                        val graphic = FaceGraphic(mGraphicOverlay, faces.valueAt(0))
-                        mGraphicOverlay?.add(graphic)
+                        //val graphic = FaceGraphic(mGraphicOverlay, faces.valueAt(0))
+                        // mGraphicOverlay?.add(graphic)
 
 
                     }
