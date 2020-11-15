@@ -56,11 +56,10 @@ class GoalActivity : AppCompatActivity() {
             // Set a click listener for set time button widget
             button_set.setOnClickListener {
                 goalWrite(myRef, time_picker)
-                AlertDialog.Builder(this)
+                CustomDialog(this)
                     .setMessage("목표를 저장했습니다")
-                    .setPositiveButton("OK",
-                        DialogInterface.OnClickListener { dialog, which -> finish() })
-                    .show()
+                    .setPositiveButton("OK") { finish()
+                    }.show()
             }
         }
 
