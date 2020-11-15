@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">모여락</string>
+    <string name="app_name">캠공</string>
     <string name="text_default">loading fail</string>
     <string name="real_time">Real Time</string>
     <string name="total_time">Total Time</string>
