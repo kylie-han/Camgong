@@ -76,7 +76,7 @@ class FragmentTabCalendar : Fragment() {
             view.btnMonthly.setBackground(resources.getDrawable(R.drawable.button_custom))
         }
 
-        // 선택된 날짜가 변경 리스너
+        // 선택된 날짜 변경 리스너
         view.calendar.setOnDateChangedListener(object : OnDateSelectedListener {
             override fun onDateSelected(
                 widget: MaterialCalendarView,
@@ -88,6 +88,8 @@ class FragmentTabCalendar : Fragment() {
                 for (i in 0..2)
                     dailyInfo[i] = 0
                 getDayInfo(view, date)
+                initBtn(view)
+                view.btnDaily.setBackground(resources.getDrawable(R.drawable.button_custom))
             }
         })// end of setOnDateChangedListener
 
@@ -107,6 +109,8 @@ class FragmentTabCalendar : Fragment() {
                 }
 
                 getmonthlyInfo(view, date) // 해당 월의 공부정보 가져옴
+                initBtn(view)
+                view.btnMonthly.setBackground(resources.getDrawable(R.drawable.button_custom))
             }
         })// end of setOnMonthChangedListener
 
@@ -144,7 +148,7 @@ class FragmentTabCalendar : Fragment() {
     private fun getStringDate(date: CalendarDay, flag: Boolean = false): String {
         var res : String = "${date.year}"
 
-        if(date.month < 10) res += "0${date.month+1}"
+        if(date.month < 9) res += "0${date.month+1}"
         else res += "${date.month+1}"
 
         if(flag){
@@ -407,7 +411,6 @@ class FragmentTabCalendar : Fragment() {
             var date = month  // YYYYMMDD
             if(i<10) date += "0$i"
             else date += "$i"
-
             var ref = ins.getReference("/calendar/$uid/$date/dailyGoal")
             val day = CalendarDay.from(current.year, current.month, i) // 현재 조회중인 날짜
 
