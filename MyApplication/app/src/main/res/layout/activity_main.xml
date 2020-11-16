@@ -18,10 +18,11 @@
         android:id="@+id/tabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:tabIndicatorColor="#C7A2CD"
-        app:tabMode="fixed"
+        app:tabGravity="fill"
+        app:tabIndicatorColor="@color/calendar"
+        app:tabIndicatorGravity="top"
         app:tabMaxWidth="0dp"
-        app:tabGravity="fill" />
+        app:tabMode="fixed" />
 
 
 
