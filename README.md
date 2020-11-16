@@ -27,7 +27,6 @@
 ![wireframe](/uploads/7053b527109bfc956b161d5e3d6b12c2/wireframe.png)
 
 
-
 ## &#128640;수동 배포 방법 
 
 1. Build -> Generate Signed Bundle / APK 선택
@@ -48,3 +47,48 @@
 ## 📝개발 계획
 
 ![gantt_chart](/uploads/1f8a04f392258ca5cc379aba690d4683/gantt_chart.png)
+
+## 기타 정보
+
+1. git & jira
+
+   ```
+   - jira - https://jira.ssafy.com/projects/S03P31A410 - git - https://lab.ssafy.com/s03-final/S03P31A410
+   ```
+
+2. 배포 정보
+
+   ```
+   - mobile 구글 플레이 앱 심사중... 
+   - apk - https://drive.google.com/file/d/1xJeHGFCiFc_UAcnx_8PnnsZvmCOIs7dY/view?usp=sharing 
+   - test 가능한 계정/패스워드 - ssafyproject124@gmail.com / ssafytest
+   ```
+
+3. 프로젝트 제목
+
+   ```
+   - 캠공
+   ```
+
+4. 기술 스택
+
+   ```
+   - Android Studio, Kotlin, Firebase(Realtime Database, ML Kit)
+   ```
+
+5. 모든 구현 기능 목록
+
+   ```
+   - 구글 로그인
+   - 타이머 기능
+   - 얼굴인식을 이용한 타이머 기능
+     - 얼굴인식이 되는 동안 실제 공부시간 증가
+     - 눈을 감았다 인식하거나 얼굴인식이 안된 상태로 1분 지속될 경우 타이머 멈춤
+     - 5분이상 지속되는 시간은 집중한 시간으로 설정
+   - 저장된 데이터의 통계(일, 주, 월별)
+     - 총 공부시간, 실제 공부시간, 최대 집중시간, 휴식시간 등
+   - 직전 일주일의 데이터로 적절한 공부시간 추천
+   - 목표시간설정, 목표시간 달성 여부
+   - 시간표 기능(공부내역을 보여줌)
+   ```
+
