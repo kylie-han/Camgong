@@ -16,21 +16,19 @@ class SplashActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //  setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE); 화면 가로 고정
         setContentView(com.moyeorak.camgong.R.layout.activity_splash)
         linearLayout =
-            findViewById<View>(com.moyeorak.camgong.R.id.activity_splash) as LinearLayout // Declare an imageView to show the animation.
+            findViewById<View>(com.moyeorak.camgong.R.id.activity_splash) as LinearLayout
         anim = AnimationUtils.loadAnimation(
             applicationContext,
             R.anim.fade_in
-        ) // Create the animation.
+        )
 
         anim!!.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation) {}
             override fun onAnimationEnd(animation: Animation) {
                 startActivity(Intent(this@SplashActivity, LoginActivity::class.java))
                 finish()
-                // HomeActivity.class is the activity to go after showing the splash screen.
             }
 
             override fun onAnimationRepeat(animation: Animation) {}
