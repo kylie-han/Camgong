@@ -45,7 +45,6 @@
 
 
 
+## 📝개발 계획
 
-
-
-
+![gantt_chart](/uploads/1f8a04f392258ca5cc379aba690d4683/gantt_chart.png)
