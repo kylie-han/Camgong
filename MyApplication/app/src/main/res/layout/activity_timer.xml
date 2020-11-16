@@ -58,7 +58,7 @@
         android:format="00:%s"
         android:textColor="@color/textBlack"
         android:textSize="55sp" />
-    <com.example.myapplication.timecamera.CameraSourcePreview
+    <com.moyeorak.camgong.timecamera.CameraSourcePreview
         android:id="@+id/preview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -78,12 +78,12 @@
 <!--            android:textSize="55sp" />-->
 
 
-        <com.example.myapplication.timecamera.GraphicOverlay
+        <com.moyeorak.camgong.timecamera.GraphicOverlay
             android:id="@+id/faceOverlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-    </com.example.myapplication.timecamera.CameraSourcePreview>
+    </com.moyeorak.camgong.timecamera.CameraSourcePreview>
     <Chronometer
         android:id="@+id/chronometer"
         android:layout_width="wrap_content"
