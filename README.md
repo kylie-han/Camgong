@@ -28,7 +28,7 @@
 
 ## 👀와이어프레임
 
-![wireframe](/uploads/7053b527109bfc956b161d5e3d6b12c2/wireframe.png)
+![wireframe](https://user-images.githubusercontent.com/60127173/99337753-3901ff80-28c6-11eb-9977-a345d392afaf.png)
 
 
 ## &#128640;수동 배포 방법 
