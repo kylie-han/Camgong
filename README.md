@@ -22,6 +22,10 @@
 - 집중하기 좋은 공부시간 추천
 - *****사용하고 싶은 깔끔하고 보기 편한 uiux*****
 
+## 시연 영상
+
+[![SSAFY_3기_캠공_UCC](https://youtu.be/7wGEgsYu_O8/0.jpg)](https://youtu.be/7wGEgsYu_O8)
+
 ## 👀와이어프레임
 
 ![wireframe](/uploads/7053b527109bfc956b161d5e3d6b12c2/wireframe.png)
