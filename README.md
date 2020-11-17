@@ -24,7 +24,7 @@
 
 ## 시연 영상
 
-[![SSAFY_3기_캠공_UCC](https://youtu.be/7wGEgsYu_O8/0.jpg)](https://youtu.be/7wGEgsYu_O8)
+[![SSAFY_3기_캠공_UCC](http://img.youtube.com/vi/7wGEgsYu_O8/0.jpg)](https://youtu.be/7wGEgsYu_O8)
 
 ## 👀와이어프레임
 
