@@ -50,7 +50,7 @@
 
 ## 📝개발 계획
 
-![gantt_chart](/uploads/1f8a04f392258ca5cc379aba690d4683/gantt_chart.png)
+![gantt_chart](https://user-images.githubusercontent.com/60127173/99337967-b0379380-28c6-11eb-95bf-257bee98b21e.png)
 
 ## 기타 정보
 
